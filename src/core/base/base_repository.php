@@ -13,15 +13,15 @@ abstract class BaseRepository {
     $this->db = $db;
   }
   
-  public function findAll(): array {
+  public function find_all(): array {
     return $this->db->select($this->table);
   }
   
-  public function findBypk($pk): ?array {
-    return $this->db->selectBypk($this->table, $pk);
+  public function find_by_pk($pk): ?array {
+    return $this->db->select_by_pk($this->table, $pk);
   }
   
-  public function findWhere(array $where): array {
+  public function find_where(array $where): array {
     return $this->db->select($this->table, $where);
   }
   

@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Db\Adapters;
 
 require "../../vendor/autoload.php";
-require "../../core/base/BaseAdapter.php";
+require "../../core/base/base_adapter.php";
 require "../../utils/load_dotenv.php";
-require "../../core/utils/Logger.php";
+require "../../core/utils/logger.php";
 
 use Core\Base\BaseAdapter;
 use Core\Utils\Logger;
@@ -122,24 +122,24 @@ class SupabaseAdapter extends BaseAdapter {
     return $success;
   }
 
-  public function join(string $mainTable, string $joinTable, string $foreignKey, string $select = '*'): array {
-    Logger::all("Join entre {$mainTable} e {$joinTable}", [
-      'foreignKey' => $foreignKey,
+  public function join(string $main_table, string $join_table, string $foreign_key, string $select = '*'): array {
+    Logger::all("Join entre {$main_table} e {$join_table}", [
+      'foreign_key' => $foreign_key,
       'select' => $select
     ]);
     
     $query = $this->service->initializeQueryBuilder();
   
     $result = $query->select($select)
-      ->from($mainTable)
-      ->join($joinTable, $foreignKey)
+      ->from($main_table)
+      ->join($join_table, $foreign_key)
       ->execute()
       ->getResult();
   
     if (empty($result)) {
       Logger::warning("Join retornou vazio", [
-        'mainTable' => $mainTable,
-        'joinTable' => $joinTable
+        'main_table' => $main_table,
+        'join_table' => $join_table
       ]);
       return [];
     }

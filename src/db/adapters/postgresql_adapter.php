@@ -1,28 +1,28 @@
 <?php
 declare(strict_types=1);
 
-namespace Db\Adapters;
+namespace db\adapters;
 
 require "../../vendor/autoload.php";
-require "../../core/base/BaseAdapter.php";
+require "../../core/base/base_adapter.php";
 require "../../utils/load_dotenv.php";
-require "../../core/utils/Logger.php";
+require "../../core/utils/logger.php";
 
-use Core\Base\BaseAdapter;
-use Core\Utils\Logger;
+use core\base\base_adapter;
+use core\utils\logger;
 use PDO;
 use PDOException;
 use Exception;
 use RuntimeException;
 
-class PostgresqlAdapter extends BaseAdapter {
+class postgresql_adapter extends base_adapter {
   private array $env_vars;
   private ?PDO $pdo = null;
 
   public function __construct() {
     try {
       $this->env_vars = load_dotenv();
-      Logger::setLogLevel($this->env_vars['log_level'] ?? 'all');
+      logger::set_log_level($this->env_vars['log_level'] ?? 'all');
       
       $dsn = sprintf(
         "pgsql:host=%s;port=%s;dbname=%s",
@@ -42,12 +42,12 @@ class PostgresqlAdapter extends BaseAdapter {
         ]
       );
       
-      Logger::all("PgsqlAdapter inicializado", ['database' => $this->env_vars["db_name"]]);
+      logger::all("pgsql_adapter inicializado", ['database' => $this->env_vars["db_name"]]);
     } catch (PDOException $e) {
-      Logger::error("Erro ao conectar ao PostgreSQL", ['error' => $e->getMessage()]);
+      logger::error("Erro ao conectar ao PostgreSQL", ['error' => $e->getMessage()]);
       throw new RuntimeException("Erro ao conectar ao PostgreSQL: " . $e->getMessage());
     } catch (Exception $e) {
-      Logger::error("Erro ao iniciar PgsqlAdapter", ['error' => $e->getMessage()]);
+      logger::error("Erro ao iniciar pgsql_adapter", ['error' => $e->getMessage()]);
       throw new RuntimeException("Erro ao iniciar o banco de dados: " . $e->getMessage());
     }
   }
@@ -72,17 +72,17 @@ class PostgresqlAdapter extends BaseAdapter {
         ]
       );
       
-      Logger::info("PostgreSQL conectado via config", ['database' => $config['database'] ?? 'unknown']);
+      logger::info("PostgreSQL conectado via config", ['database' => $config['database'] ?? 'unknown']);
     }
   }
 
   public function disconnect(): void {
     $this->pdo = null;
-    Logger::all("PostgreSQL desconectado");
+    logger::all("PostgreSQL desconectado");
   }
 
   public function insert(string $table, array $data): array {
-    Logger::all("Insert em {$table}", $data);
+    logger::all("Insert em {$table}", $data);
     
     $columns = implode(', ', array_keys($data));
     $placeholders = ':' . implode(', :', array_keys($data));
@@ -94,15 +94,15 @@ class PostgresqlAdapter extends BaseAdapter {
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     $id = $result['id'] ?? null;
     
-    $result = $this->selectById($table, $id);
+    $result = $this->select_by_id($table, $id);
     
-    Logger::info("Insert concluído em {$table}", ['id' => $id]);
+    logger::info("Insert concluído em {$table}", ['id' => $id]);
     
     return $result;
   }
 
   public function select(string $table, array $where = []): array {
-    Logger::all("Select em {$table}", ['where' => $where]);
+    logger::all("Select em {$table}", ['where' => $where]);
     
     $sql = "SELECT * FROM {$table}";
     $params = [];
@@ -121,25 +121,25 @@ class PostgresqlAdapter extends BaseAdapter {
     
     $result = $stmt->fetchAll();
     
-    Logger::all("Select retornou " . count($result) . " registros de {$table}");
+    logger::all("Select retornou " . count($result) . " registros de {$table}");
     
     return $result;
   }
 
-  public function selectById(string $table, $id): ?array {
-    Logger::all("SelectById em {$table}", ['id' => $id]);
+  public function select_by_id(string $table, $id): ?array {
+    logger::all("SelectById em {$table}", ['id' => $id]);
     
     $result = $this->select($table, ['id' => $id]);
     
     if (!$result[0]) {
-      Logger::warning("Registro nao encontrado", ['table' => $table, 'id' => $id]);
+      logger::warning("Registro nao encontrado", ['table' => $table, 'id' => $id]);
     }
     
     return $result[0] ?? null;
   }
 
   public function update(string $table, $id, array $data): array {
-    Logger::all("Update em {$table}", ['id' => $id, 'data' => $data]);
+    logger::all("Update em {$table}", ['id' => $id, 'data' => $data]);
     
     $sets = [];
     foreach ($data as $key => $value) {
@@ -152,50 +152,50 @@ class PostgresqlAdapter extends BaseAdapter {
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute($data);
     
-    $result = $this->selectById($table, $id);
+    $result = $this->select_by_id($table, $id);
     
-    Logger::info("Update concluído em {$table}", ['id' => $id]);
+    logger::info("Update concluído em {$table}", ['id' => $id]);
     
     return $result;
   }
 
   public function delete(string $table, $id): bool {
-    Logger::warning("Delete em {$table}", ['id' => $id]);
+    logger::warning("Delete em {$table}", ['id' => $id]);
     
     $sql = "DELETE FROM {$table} WHERE id = :id";
     $stmt = $this->pdo->prepare($sql);
     $success = $stmt->execute(['id' => $id]);
     
     if ($success) {
-      Logger::info("Delete concluído em {$table}", ['id' => $id]);
+      logger::info("Delete concluído em {$table}", ['id' => $id]);
     } else {
-      Logger::error("Delete falhou em {$table}", ['id' => $id]);
+      logger::error("Delete falhou em {$table}", ['id' => $id]);
     }
     
     return $success;
   }
 
-  public function join(string $mainTable, string $joinTable, string $foreignKey, string $select = '*'): array {
-    Logger::all("Join entre {$mainTable} e {$joinTable}", [
-      'foreignKey' => $foreignKey,
+  public function join(string $main_table, string $join_table, string $foreign_key, string $select = '*'): array {
+    logger::all("Join entre {$main_table} e {$join_table}", [
+      'foreign_key' => $foreign_key,
       'select' => $select
     ]);
     
-    $on = "{$mainTable}.{$foreignKey} = {$joinTable}.id";
-    $sql = "SELECT {$select} FROM {$mainTable} 
-            INNER JOIN {$joinTable} ON {$on}";
+    $on = "{$main_table}.{$foreign_key} = {$join_table}.id";
+    $sql = "SELECT {$select} FROM {$main_table} 
+            INNER JOIN {$join_table} ON {$on}";
     
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute();
     
     $result = $stmt->fetchAll();
     
-    Logger::all("Join retornou " . count($result) . " registros");
+    logger::all("Join retornou " . count($result) . " registros");
     
     return $result;
   }
 
-  public function getPdo(): ?PDO {
+  public function get_pdo(): ?PDO {
     return $this->pdo;
   }
 }

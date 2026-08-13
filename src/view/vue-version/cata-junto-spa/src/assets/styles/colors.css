@@ -1,0 +1,23 @@
+:root {
+  --bg-main: #f2f3f0;
+  --bg-block: #ffffff;
+  --bg-alternative: #fbfbff;
+  --text-main: #09090b;
+  --text-alternative: #71717a;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --border: #c4c4c7;
+  --shadow: 0 10.3px 30px -10px rgba(0, 0, 0, 0.04);
+}
+
+html.dark {
+  --bg-main: #09090b;
+  --bg-block: #121217;
+  --bg-alternative: #1a1a1a;
+  --text-main: #fafafa;
+  --text-alternative: #a1a1aa;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --border: rgb(52, 52, 52);
+  --shadow: 0 10.3px 30px -10px rgba(0, 0, 0, 0.5);
+}

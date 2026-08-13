@@ -22,7 +22,7 @@ class MysqlAdapter extends BaseAdapter {
   public function __construct() {
     try {
       $this->env_vars = load_dotenv();
-      Logger::setLogLevel($this->env_vars['log_level'] ?? 'all');
+      Logger::set_log_level($this->env_vars['log_level'] ?? 'all');
       
       $dsn = sprintf(
         "mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4",
@@ -91,8 +91,8 @@ class MysqlAdapter extends BaseAdapter {
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute($data);
     
-    $id = $this->pdo->lastInsertId();
-    $result = $this->selectById($table, $id);
+    $id = (int) $this->pdo->lastInsertId();
+    $result = $this->select_by_id($table, $id);
     
     Logger::info("Insert concluído em {$table}", ['id' => $id]);
     
@@ -124,12 +124,12 @@ class MysqlAdapter extends BaseAdapter {
     return $result;
   }
 
-  public function selectById(string $table, int $id): ?array {
-    Logger::all("SelectById em {$table}", ['id' => $id]);
+  public function select_by_id(string $table, int $id): ?array {
+    Logger::all("select_by_id em {$table}", ['id' => $id]);
     
     $result = $this->select($table, ['id' => $id]);
     
-    if (!$result[0]) {
+    if (empty($result[0])) {
       Logger::warning("Registro não encontrado", ['table' => $table, 'id' => $id]);
     }
     
@@ -150,7 +150,7 @@ class MysqlAdapter extends BaseAdapter {
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute($data);
     
-    $result = $this->selectById($table, $id);
+    $result = $this->select_by_id($table, $id);
     
     Logger::info("Update concluído em {$table}", ['id' => $id]);
     
@@ -173,15 +173,15 @@ class MysqlAdapter extends BaseAdapter {
     return $success;
   }
 
-  public function join(string $mainTable, string $joinTable, string $foreignKey, string $select = '*'): array {
-    Logger::all("Join entre {$mainTable} e {$joinTable}", [
-      'foreignKey' => $foreignKey,
+  public function join(string $main_table, string $join_table, string $foreign_key, string $select = '*'): array {
+    Logger::all("Join entre {$main_table} e {$join_table}", [
+      'foreign_key' => $foreign_key,
       'select' => $select
     ]);
     
-    $on = "{$mainTable}.{$foreignKey} = {$joinTable}.id";
-    $sql = "SELECT {$select} FROM {$mainTable} 
-            INNER JOIN {$joinTable} ON {$on}";
+    $on = "{$main_table}.{$foreign_key} = {$join_table}.id";
+    $sql = "SELECT {$select} FROM {$main_table} 
+            INNER JOIN {$join_table} ON {$on}";
     
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute();
@@ -193,7 +193,7 @@ class MysqlAdapter extends BaseAdapter {
     return $result;
   }
 
-  public function getPdo(): ?PDO {
+  public function get_pdo(): ?PDO {
     return $this->pdo;
   }
 }

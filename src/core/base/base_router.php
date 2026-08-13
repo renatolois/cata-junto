@@ -5,7 +5,7 @@ namespace Core\Base;
 abstract class BaseRouter {
   protected $routes = [];
 
-  public function setRoute(string $method, string $route, string $actions): void {
+  public function set_route(string $method, string $route, string $actions): void {
     $pattern = preg_replace('/\{([a-z]+)\}/', '(?P<$1>[^/]+)', $route);
     $pattern = '#^' . $pattern . '$#';
     
@@ -55,7 +55,6 @@ abstract class BaseRouter {
       echo "Method not allowed";
       return;
     }
-
 
     if (isset($this->routes[$method][$uri_route])) {
       $this->call($this->routes[$method][$uri_route]['action']);
