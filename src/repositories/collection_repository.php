@@ -1,0 +1,1 @@
+// only repositories for subclasses from collection: residential collection and in person collection

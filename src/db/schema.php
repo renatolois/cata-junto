@@ -24,15 +24,15 @@ class Schema {
     switch ($DB_TYPE) {
       case 'mysql':
 				require_once __DIR__ . '/schemas/mysql_schema.php';
-        $creation_string = MysqlSchema::getCreationString();
+        $creation_string = MysqlSchema::get_creation_string();
         break;
       case 'postgresql':
 				require_once __DIR__ . '/schemas/postgresql_schema.php';
-        $creation_string = PostgresSchema::getCreationString();
+        $creation_string = PostgresSchema::get_creation_string();
         break;
 			case 'supabase':
 				require_once __DIR__ . '/schemas/supabase_schema.php';
-        $creation_string = SupabaseSchema::getCreationString();
+        $creation_string = SupabaseSchema::get_creation_string();
         break;
       default:
         throw new RuntimeException("Tipo de banco de dados não reconhecido: {$DB_TYPE}");

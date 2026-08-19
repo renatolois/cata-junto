@@ -93,7 +93,10 @@
 - ## Tipo de Material
 - `ID -> Int`
 - `Nome -> String`
-- `Preço por Peso -> Int`
+- `Preço por Peso -> Float`
+- `Preço por Unidade-> Float`
+- `Pontos por Peso -> Int`
+- `Pontos por Unidade-> Int`
 
 - ## Tipo de Prêmio
 - `ID -> Int`

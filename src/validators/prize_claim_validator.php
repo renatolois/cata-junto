@@ -10,7 +10,7 @@ use App\Core\Utils\NeutralValue;
 
 class PrizeClaimValidator extends BaseValidator {
   
-  private const ALLOWED_STATUSES = ['pending', 'finished', 'cancelled', 'rejected'];
+  private const ALLOWED_STATUSES = ['pending', 'finished', 'cancelled', 'rejected', 'inactive'];
   
   private array $optional_fields = [
     'collected_at'

@@ -12,7 +12,7 @@ class ResidentialCollectionValidator extends BaseValidator {
   
   private const COLLECT_TYPES = ['weight', 'unit'];
   private const MAX_TEXT_LENGTH = 500;
-  private const ALLOWED_STATUSES = ['pending', 'completed', 'cancelled', 'rejected'];
+  private const ALLOWED_STATUSES = ['pending', 'completed', 'cancelled', 'rejected', 'inactive'];
   
   private array $optional_fields = [
     'collected_by', 'collected_at', 'observation', 

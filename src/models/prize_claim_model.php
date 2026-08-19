@@ -12,13 +12,13 @@ class PrizeClaimModel extends BaseModel {
         ['id', 'int'],
         ['claimed_by', 'uuid'],
         ['prize_type_id', 'int'],
-        ['collection_point_id', 'string'],
+        ['collection_location_id', 'uuid'],
         ['status', 'string'],
         ['claimed_at', 'datetime'],
         ['collected_at', 'datetime']
       ],
       fillables: [
-        'claimed_by', 'prize_type_id', 'collection_point_id', 'status', 
+        'claimed_by', 'prize_type_id', 'collection_location_id', 'status', 
         'claimed_at', 'collected_at'
       ],
       hiddens: []

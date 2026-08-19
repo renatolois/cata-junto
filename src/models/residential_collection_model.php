@@ -15,7 +15,7 @@ class ResidentialCollectionModel extends CollectionModel {
         ['requested_at', 'datetime'],
         ['description', 'string'],
         ['status', 'string'],
-        ['deactivation_at', 'date'],
+        ['deactivation_at', 'datetime'],
         ['deactivation_justification', 'string']
       ]
     );
