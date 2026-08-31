@@ -165,9 +165,9 @@ class MysqlAdapter extends BaseAdapter {
     $success = $stmt->execute(['id' => $id]);
     
     if ($success) {
-      Logger::info("Delete concluído em {$table}", ['id' => $id]);
+      Logger::info("Delete succeeded in {$table}", ['id' => $id]);
     } else {
-      Logger::error("Delete falhou em {$table}", ['id' => $id]);
+      Logger::error("Delete failed in {$table}", ['id' => $id]);
     }
     
     return $success;

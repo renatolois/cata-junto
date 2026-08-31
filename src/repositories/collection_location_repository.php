@@ -73,7 +73,7 @@ class CollectionLocationRepository extends BaseRepository {
     return (int) $result['total'];
   }
 
-  private function hydrate(array $data): CollectionLocationModel {
+  public function hydrate(array $data): CollectionLocationModel {
     $collection_location = new CollectionLocationModel();
 
     $collection_location->set_id($data['id'] ?? null);
@@ -94,7 +94,7 @@ class CollectionLocationRepository extends BaseRepository {
     return $collection_location;
   }
 
-  private function map_to_database(array $data): array {
+  public function map_to_database(array $data): array {
     $mapped = [];
 
     if (isset($data['id'])) {

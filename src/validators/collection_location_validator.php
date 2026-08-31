@@ -10,13 +10,8 @@ use App\Core\Utils\NeutralValue;
 
 class CollectionLocationValidator extends BaseValidator {
   
-  public function validate($obj): array {
+  public function validate(CollectionLocationModel $obj): array {
     $this->errors = [];
-
-    if (!$obj instanceof CollectionLocationModel) {
-      $this->errors[] = "The object must be an instance of CollectionLocationModel.";
-      return $this->errors;
-    }
 
     $attributes = $obj->get_attributes();
     $cast_types = $obj->get_cast_types();

@@ -77,13 +77,8 @@ class PersonValidator extends BaseValidator {
     return $this->errors;
   }
 
-  public function validate_fillables($obj): array {
+  public function validate_fillables(PersonModel $obj): array {
     $this->errors = [];
-
-    if (!$obj instanceof PersonModel) {
-      $this->errors[] = "The object must be an instance of PersonModel.";
-      return $this->errors;
-    }
     
     $fillables = $obj->get_fillables();
     $attributes = $obj->get_attributes();

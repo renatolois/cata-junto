@@ -55,7 +55,7 @@ class PrizeTypeRepository extends BaseRepository {
     return (int) $result['total'];
   }
 
-  private function hydrate(array $data): PrizeTypeModel {
+  public function hydrate(array $data): PrizeTypeModel {
     $prize_type = new PrizeTypeModel();
 
     $prize_type->set_id($data['id'] ?? null);
@@ -67,9 +67,8 @@ class PrizeTypeRepository extends BaseRepository {
     return $prize_type;
   }
 
-  private function map_to_database(array $data): array {
+  public function map_to_database(array $data): array {
     $mapped = [];
-
     if (isset($data['id'])) {
       $mapped['id'] = $data['id'];
     }

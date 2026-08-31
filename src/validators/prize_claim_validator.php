@@ -16,13 +16,8 @@ class PrizeClaimValidator extends BaseValidator {
     'collected_at'
   ];
   
-  public function validate($obj): array {
+  public function validate(PrizeClaimModel $obj): array {
     $this->errors = [];
-
-    if (!$obj instanceof PrizeClaimModel) {
-      $this->errors[] = "The object must be an instance of PrizeClaimModel.";
-      return $this->errors;
-    }
 
     $attributes = $obj->get_attributes();
     $cast_types = $obj->get_cast_types();

@@ -66,7 +66,7 @@ class PersonRepository extends BaseRepository {
     return (int) $result['total'];
   }
 
-  private function hydrate(array $data): PersonModel {
+  public function hydrate(array $data): PersonModel {
     $person = new PersonModel();
 
     $person->set_id($data['id'] ?? null);
@@ -83,7 +83,7 @@ class PersonRepository extends BaseRepository {
     return $person;
   }
 
-  private function map_to_database(array $data): array {
+  public function map_to_database(array $data): array {
     $mapped = [];
 
     if (isset($data['id'])) {

@@ -36,6 +36,41 @@ class ContractRepository extends BaseRepository {
     return array_map([$this, 'hydrate'], $result);
   }
 
+  public function find_pending_by_person_and_role(string $person_id, int $role_id): ?ContractModel {
+    $sql = "SELECT * FROM {$this->table} 
+            WHERE person_id = :person_id 
+              AND role_id = :role_id 
+              AND status = 'pending' 
+            LIMIT 1";
+    $stmt = $this->db->query($sql, ['person_id' => $person_id, 'role_id' => $role_id]);
+    $data = $stmt->fetch();
+    return $data ? $this->hydrate($data) : null;
+  }
+
+  public function find_active_by_person_and_role(string $person_id, int $role_id): ?ContractModel {
+    $sql = "SELECT * FROM {$this->table} 
+            WHERE person_id = :person_id 
+              AND role_id = :role_id 
+              AND status = 'approved' 
+              AND contract_end_at IS NULL 
+            LIMIT 1";
+    $stmt = $this->db->query($sql, ['person_id' => $person_id, 'role_id' => $role_id]);
+    $data = $stmt->fetch();
+    return $data ? $this->hydrate($data) : null;
+  }
+
+  public function find_last_rejection_for_person_and_role(string $person_id, int $role_id): ?ContractModel {
+    $sql = "SELECT * FROM {$this->table} 
+            WHERE person_id = :person_id 
+              AND role_id = :role_id 
+              AND status = 'rejected' 
+            ORDER BY responded_at DESC 
+            LIMIT 1";
+    $stmt = $this->db->query($sql, ['person_id' => $person_id, 'role_id' => $role_id]);
+    $data = $stmt->fetch();
+    return $data ? $this->hydrate($data) : null;
+  }
+
   public function create_contract(array $data): ContractModel {
     if (!isset($data['id'])) {
       $data['id'] = $this->generate_uuid();
@@ -63,7 +98,7 @@ class ContractRepository extends BaseRepository {
     return (int) $result['total'];
   }
 
-  private function hydrate(array $data): ContractModel {
+  public function hydrate(array $data): ContractModel {
     $contract = new ContractModel();
 
     $contract->set_id($data['id'] ?? null);
@@ -81,7 +116,7 @@ class ContractRepository extends BaseRepository {
     return $contract;
   }
 
-  private function map_to_database(array $data): array {
+  public function map_to_database(array $data): array {
     $mapped = [];
 
     if (isset($data['id'])) {

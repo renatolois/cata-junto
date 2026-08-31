@@ -17,7 +17,7 @@ abstract class BaseRepository {
     return $this->db->select($this->table);
   }
   
-  public function find_by_pk($pk): ?array {
+  public function find_by_pk(int|string $pk): ?array {
     return $this->db->select_by_pk($this->table, $pk);
   }
   
@@ -29,11 +29,11 @@ abstract class BaseRepository {
     return $this->db->insert($this->table, $data);
   }
   
-  public function update($pk, array $data): array {
+  public function update(int|string $pk, array $data): array {
     return $this->db->update($this->table, $pk, $data);
   }
   
-  public function delete($pk): bool {
+  public function delete(int|string $pk): bool {
     return $this->db->delete($this->table, $pk);
   }
 

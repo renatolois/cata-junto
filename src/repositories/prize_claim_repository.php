@@ -65,7 +65,7 @@ class PrizeClaimRepository extends BaseRepository {
     return (int) $result['total'];
   }
 
-  private function hydrate(array $data): PrizeClaimModel {
+  public function hydrate(array $data): PrizeClaimModel {
     $prize_claim = new PrizeClaimModel();
 
     $prize_claim->set_id($data['id'] ?? null);
@@ -79,7 +79,7 @@ class PrizeClaimRepository extends BaseRepository {
     return $prize_claim;
   }
 
-  private function map_to_database(array $data): array {
+  public function map_to_database(array $data): array {
     $mapped = [];
 
     if (isset($data['id'])) {

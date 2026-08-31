@@ -13,13 +13,8 @@ class PrizeTypeValidator extends BaseValidator {
   private const MAX_NAME_LENGTH = 100;
   private const MAX_DESCRIPTION_LENGTH = 500;
   
-  public function validate($obj): array {
+  public function validate(PrizeTypeModel $obj): array {
     $this->errors = [];
-
-    if (!$obj instanceof PrizeTypeModel) {
-      $this->errors[] = "The object must be an instance of PrizeTypeModel.";
-      return $this->errors;
-    }
 
     $attributes = $obj->get_attributes();
     $cast_types = $obj->get_cast_types();

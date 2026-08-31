@@ -57,7 +57,7 @@ class ResidentialCollectionRepository extends BaseRepository {
     return (int) $result['total'];
   }
 
-  private function hydrate(array $data): ResidentialCollectionModel {
+  public function hydrate(array $data): ResidentialCollectionModel {
     $collection = new ResidentialCollectionModel();
 
     $collection->set_id($data['id'] ?? null);
@@ -78,7 +78,7 @@ class ResidentialCollectionRepository extends BaseRepository {
     return $collection;
   }
 
-  private function map_to_database(array $data): array {
+  public function map_to_database(array $data): array {
     $mapped = [];
 
     if (isset($data['id'])) {

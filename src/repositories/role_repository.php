@@ -55,7 +55,7 @@ class RoleRepository extends BaseRepository {
     return (int) $result['total'];
   }
 
-  private function hydrate(array $data): RoleModel {
+  public function hydrate(array $data): RoleModel {
     $role = new RoleModel();
 
     $role->set_id($data['id'] ?? null);
@@ -65,7 +65,7 @@ class RoleRepository extends BaseRepository {
     return $role;
   }
 
-  private function map_to_database(array $data): array {
+  public function map_to_database(array $data): array {
     $mapped = [];
 
     if (isset($data['id'])) {

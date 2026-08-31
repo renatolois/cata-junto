@@ -17,13 +17,8 @@ class InPersonCollectionValidator extends BaseValidator {
     'observation'
   ];
   
-  public function validate($obj): array {
+  public function validate(InPersonCollectionModel $obj): array {
     $this->errors = [];
-
-    if (!$obj instanceof InPersonCollectionModel) {
-      $this->errors[] = "The object must be an instance of InPersonCollectionModel.";
-      return $this->errors;
-    }
 
     $attributes = $obj->get_attributes();
     $cast_types = $obj->get_cast_types();

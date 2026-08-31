@@ -68,7 +68,7 @@ class InPersonCollectionRepository extends BaseRepository {
     return (int) $result['total'];
   }
 
-  private function hydrate(array $data): InPersonCollectionModel {
+  public function hydrate(array $data): InPersonCollectionModel {
     $collection = new InPersonCollectionModel();
 
     $collection->set_id($data['id'] ?? null);
@@ -83,7 +83,7 @@ class InPersonCollectionRepository extends BaseRepository {
     return $collection;
   }
 
-  private function map_to_database(array $data): array {
+  public function map_to_database(array $data): array {
     $mapped = [];
 
     if (isset($data['id'])) {

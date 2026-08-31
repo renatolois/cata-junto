@@ -55,7 +55,7 @@ class MaterialTypeRepository extends BaseRepository {
     return (int) $result['total'];
   }
 
-  private function hydrate(array $data): MaterialTypeModel {
+  public function hydrate(array $data): MaterialTypeModel {
     $material_type = new MaterialTypeModel();
 
     $material_type->set_id($data['id'] ?? null);
@@ -70,7 +70,7 @@ class MaterialTypeRepository extends BaseRepository {
     return $material_type;
   }
 
-  private function map_to_database(array $data): array {
+  public function map_to_database(array $data): array {
     $mapped = [];
 
     if (isset($data['id'])) {
