@@ -1,7 +1,7 @@
 <?php 
 declare(strict_types=1);
-namespace Core;
+namespace Core\Utils;
 
 class AppConstants {
-	static string $DB_TYPE = "mysql";
+	public const DB_TYPE = "mysql";
 }

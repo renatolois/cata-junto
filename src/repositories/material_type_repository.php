@@ -48,13 +48,6 @@ class MaterialTypeRepository extends BaseRepository {
     return $this->db->update($this->table, $id, ['weight_active' => 0, 'unit_active' => 0]);
   }
 
-  public function count(): int {
-    $sql = "SELECT COUNT(*) as total FROM {$this->table}";
-    $stmt = $this->db->query($sql);
-    $result = $stmt->fetch();
-    return (int) $result['total'];
-  }
-
   public function hydrate(array $data): MaterialTypeModel {
     $material_type = new MaterialTypeModel();
 

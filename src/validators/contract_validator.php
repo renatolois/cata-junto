@@ -17,8 +17,13 @@ class ContractValidator extends BaseValidator {
     'response_justification', 'dismissal_justification', 'contract_end_at'
   ];
   
-  public function validate(ContractModel $obj): array {
+  public function validate($obj): array {
     $this->errors = [];
+
+    if (!$obj instanceof ContractModel) {
+      $this->errors[] = "The object must be an instance of RoleModel.";
+      return $this->errors;
+    }
 
     $attributes = $obj->get_attributes();
     $cast_types = $obj->get_cast_types();

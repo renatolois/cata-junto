@@ -2,5 +2,13 @@
     "require": {
         "supabase/supabase-php": "^0.0.1",
         "vlucas/phpdotenv": "^5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Core\\": "src/core/",
+            "Core\\Utils\\": "src/core/utils/",
+            "Db\\": "src/db/",
+            "App\\": "src/"
+        }
     }
 }

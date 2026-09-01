@@ -1,11 +1,9 @@
 <?php
-// db/schema.php
-
 declare(strict_types=1);
 
 namespace Db;
 
-require_once __DIR__ . '/../core/app_constants.php';
+require_once __DIR__ . '/../core/Utils/app_constants.php';
 require_once __DIR__ . '/../core/utils/Logger.php';
 require_once __DIR__ . '/Database.php';
 

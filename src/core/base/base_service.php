@@ -16,7 +16,7 @@ abstract class BaseService {
 		$this->validator = $validator;
 	}
 
-	public function create(array $data): array|false {
+	public function create(array $data): array|BaseModel {
 		return $this->repository->create($data);
 	}
 
@@ -24,11 +24,11 @@ abstract class BaseService {
 		return $this->repository->find_all();
 	}
 
-	public function update(int|string $pk, array $data): array|false {
+	public function update(int|string $pk, array $data): array|BaseModel {
 		return $this->repository->update($pk, $data);
 	}
 
-	public function hard_delete(int|string $pk): bool {
+	public function hard_delete(int|string $pk): bool|array {
 		return $this->repository->delete($pk);
 	}
 }

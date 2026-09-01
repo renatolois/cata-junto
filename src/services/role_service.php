@@ -10,13 +10,8 @@ use App\Repositories\RoleRepository;
 
 class RoleService extends BaseService {
 
-  private RoleRepository $repository;
-  private RoleValidator $validator;
-
   public function __construct(RoleRepository $repository, RoleValidator $validator) {
     parent::__construct($repository, $validator);
-    $this->repository = $repository;
-    $this->validator = $validator;
   }
 
   private function hydrate_and_validate(array $data): array {
@@ -40,7 +35,7 @@ class RoleService extends BaseService {
     return $result;
   }
 
-  public function update(int $pk, array $data): array|RoleModel {
+  public function update(string|int $pk, array $data): array|RoleModel {
     $role = $this->repository->find_by_id($pk);
     if ($role === null) {
       return ["errors" => ["service_error" => "Role not found."]];
@@ -92,37 +87,33 @@ class RoleService extends BaseService {
     return $this->repository->find_all();
   }
 
-  public function count(): int {
-    return $this->repository->count();
+  public function activate(int $pk): bool|array {
+    $role = $this->repository->find_by_id($pk);
+    if ($role === null) {
+      return ["errors" => ["service_error" => "Role not found."]];
+    }
+
+    $role->activate();
+    $result = $this->repository->update_role($pk, ['active' => $role->is_active()]);
+    if ($result === null) {
+      return ["errors" => ["service_error" => "Failed to activate role."]];
+    }
+
+    return $result;
   }
 
-	public function activate(int $pk): bool|array {
-	  $role = $this->repository->find_by_id($pk);
-	  if ($role === null) {
-	    return ["errors" => ["service_error" => "Role not found."]];
-	  }
-	
-	  $role->activate();
-	  $result = $this->repository->update_role($pk, ['active' => $role->is_active()]);
-	  if ($result === null) {
-	    return ["errors" => ["service_error" => "Failed to activate role."]];
-	  }
-	
-	  return $result;
-	}
-	
-	public function deactivate(int $pk): bool|array {
-	  $role = $this->repository->find_by_id($pk);
-	  if ($role === null) {
-	    return ["errors" => ["service_error" => "Role not found."]];
-	  }
-	
-	  $role->deactivate();
-	  $result = $this->repository->update_role($pk, ['active' => $role->is_active()]);
-	  if ($result === null) {
-	    return ["errors" => ["service_error" => "Failed to deactivate role."]];
-	  }
-	
-	  return $result;
-	}
+  public function deactivate(int $pk): bool|array {
+    $role = $this->repository->find_by_id($pk);
+    if ($role === null) {
+      return ["errors" => ["service_error" => "Role not found."]];
+    }
+
+    $role->deactivate();
+    $result = $this->repository->update_role($pk, ['active' => $role->is_active()]);
+    if ($result === null) {
+      return ["errors" => ["service_error" => "Failed to deactivate role."]];
+    }
+
+    return $result;
+  }
 }

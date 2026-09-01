@@ -132,6 +132,8 @@
 16. Enquanto o status for `pendente`, os campos `coletado por` e `coletado em` permanecem nulos. Quando a coleta é efetivada (status `concluída`), ambos os campos devem ser preenchidos, e o campo `quantidade` e `tipo de coleta` torna-se obrigatório.
 17. Uma coleta com status `cancelado` não pode ser descancelada (não é possível alterar seu status para `pendente` ou `concluída`). Se necessário, deve-se criar uma nova coleta residencial.
 18. Caso cancelado, a data de cancelamento deve ser registrada em data de realização.
+19. O usuário define informações na `descrição` enquanto os dados de fato devem ser definidos pelo cooperado.
+20. Uma coleta residencial só poderá ter dados alterados enquanto estiver com `status` igual a `pendente`.
 
 ### Coleta Presencial
 19. A coleta presencial é um registro de material efetivamente recebido na cooperativa. Ela ocorre no ato e não é cancelável.

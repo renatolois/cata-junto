@@ -21,5 +21,9 @@ return array(
     'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
     'GrahamCampbell\\ResultType\\' => array($vendorDir . '/graham-campbell/result-type/src'),
     'Dotenv\\' => array($vendorDir . '/vlucas/phpdotenv/src'),
+    'Db\\' => array($baseDir . '/src/db'),
+    'Core\\Utils\\' => array($baseDir . '/src/core/utils'),
+    'Core\\' => array($baseDir . '/src/core'),
     'Bayfront\\MimeTypes\\' => array($vendorDir . '/bayfrontmedia/php-mime-types/src'),
+    'App\\' => array($baseDir . '/src'),
 );

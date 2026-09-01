@@ -6,142 +6,144 @@ namespace Db\Schemas;
 class MysqlSchema {
   public static function get_creation_string(): string {
     return <<<SQL
-CREATE TABLE IF NOT EXISTS pessoa (
-  id UUID PRIMARY KEY DEFAULT UUID_V4(),
+CREATE TABLE IF NOT EXISTS person (
+  id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
   cpf VARCHAR(11) NOT NULL UNIQUE,
-  nome VARCHAR(150) NOT NULL,
+  name VARCHAR(150) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
-  email_verificado BOOLEAN DEFAULT FALSE,
-  senha_hash VARCHAR(255) NOT NULL,
-  telefone VARCHAR(20) NOT NULL,
-  data_nascimento DATE NOT NULL,
-  pontos_atuais INT DEFAULT 0,
-  ativo BOOLEAN DEFAULT TRUE
+  verified_email BOOLEAN DEFAULT FALSE,
+  password_hash VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(20) NOT NULL,
+  birth_date DATE NOT NULL,
+  current_points INT DEFAULT 0,
+  active BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE IF NOT EXISTS funcao (
+CREATE TABLE IF NOT EXISTS role (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(50) NOT NULL UNIQUE,
-  ativo BOOLEAN DEFAULT TRUE
+  name VARCHAR(50) NOT NULL UNIQUE,
+  active BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE IF NOT EXISTS vinculo (
-  id UUID PRIMARY KEY DEFAULT UUID_V4(),
-  id_pessoa UUID NOT NULL,
-  id_funcao INT NOT NULL,
-  id_respondido_por UUID,
-  id_encerrado_por UUID,
-  data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  data_resposta TIMESTAMP NULL,
+CREATE TABLE IF NOT EXISTS contract (
+  id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  person_id CHAR(36) NOT NULL,
+  role_id INT NOT NULL,
+  responded_by_id CHAR(36) NULL,
+  contract_end_by CHAR(36) NULL,
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  responded_at TIMESTAMP NULL,
   status ENUM('pending', 'approved', 'rejected', 'cancelled', 'dismissed') NOT NULL DEFAULT 'pending',
-  justificativa_resposta TEXT,
-  justificativa_demissao TEXT,
-  data_encerramento TIMESTAMP NULL,
-  FOREIGN KEY (id_pessoa) REFERENCES pessoa(id) ON DELETE RESTRICT,
-  FOREIGN KEY (id_funcao) REFERENCES funcao(id) ON DELETE RESTRICT,
-  FOREIGN KEY (id_respondido_por) REFERENCES vinculo(id) ON DELETE SET NULL,
-  FOREIGN KEY (id_encerrado_por) REFERENCES vinculo(id) ON DELETE SET NULL
+  response_justification TEXT,
+  dismissal_justification TEXT,
+  contract_end_at TIMESTAMP NULL,
+  FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE RESTRICT,
+  FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE RESTRICT,
+  FOREIGN KEY (responded_by_id) REFERENCES contract(id) ON DELETE SET NULL,
+  FOREIGN KEY (contract_end_by) REFERENCES contract(id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS ponto_coleta (
-  id UUID PRIMARY KEY DEFAULT UUID_V4(),
-  email_responsavel VARCHAR(255) NOT NULL UNIQUE,
-  email_verificado BOOLEAN DEFAULT FALSE,
-  senha_hash VARCHAR(255) NOT NULL,
-  telefone_responsavel VARCHAR(20) NOT NULL,
-  rua VARCHAR(200) NOT NULL,
-  numero VARCHAR(20) NOT NULL,
-  bairro VARCHAR(100) NOT NULL,
-  complemento VARCHAR(100),
-  cidade VARCHAR(100) NOT NULL,
-  estado CHAR(2) NOT NULL,
+CREATE TABLE IF NOT EXISTS collection_location (
+  id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  responsable_email VARCHAR(255) NOT NULL UNIQUE,
+  verified_email BOOLEAN DEFAULT FALSE,
+  password_hash VARCHAR(255) NOT NULL,
+  responsable_phone_number VARCHAR(20) NOT NULL,
+  street VARCHAR(200) NOT NULL,
+  number VARCHAR(20) NOT NULL,
+  neighborhood VARCHAR(100) NOT NULL,
+  complement VARCHAR(100),
+  city VARCHAR(100) NOT NULL,
+  state CHAR(2) NOT NULL,
   cep VARCHAR(10) NOT NULL,
-  pontos_atuais INT DEFAULT 0,
-  ativo BOOLEAN DEFAULT TRUE
+  current_points INT DEFAULT 0,
+  active BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE IF NOT EXISTS tipo_material (
+CREATE TABLE IF NOT EXISTS material_type (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(100) NOT NULL UNIQUE,
-  preco_por_peso DECIMAL(10,2) NOT NULL DEFAULT 0,
-  pontos_por_peso INT NOT NULL DEFAULT 0,
-  preco_por_unidade DECIMAL(10,2) NOT NULL DEFAULT 0,
-  pontos_por_unidade INT NOT NULL DEFAULT 0,
-  peso_ativo BOOLEAN DEFAULT TRUE,
-  unidade_ativo BOOLEAN DEFAULT TRUE
+  name VARCHAR(100) NOT NULL UNIQUE,
+  price_per_weight DECIMAL(10,2) NOT NULL DEFAULT 0,
+  points_per_weight INT NOT NULL DEFAULT 0,
+  price_per_unit DECIMAL(10,2) NOT NULL DEFAULT 0,
+  points_per_unit INT NOT NULL DEFAULT 0,
+  weight_active BOOLEAN DEFAULT TRUE,
+  unit_active BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE IF NOT EXISTS coleta (
-  id VARCHAR(36) PRIMARY KEY,
-  id_vinculo UUID,
-  id_tipo_material INT NOT NULL,
-  data_coleta TIMESTAMP NULL,
-  tipo_coleta ENUM('weight', 'unit') NOT NULL,
-  quantidade DECIMAL(10,2) NOT NULL,
-  observacao TEXT,
-  ativo BOOLEAN DEFAULT TRUE,
-  FOREIGN KEY (id_vinculo) REFERENCES vinculo(id) ON DELETE SET NULL,
-  FOREIGN KEY (id_tipo_material) REFERENCES tipo_material(id) ON DELETE RESTRICT
+CREATE TABLE IF NOT EXISTS prize_type (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  description VARCHAR(500) NOT NULL,
+  cost_points INT NOT NULL,
+  active BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE IF NOT EXISTS coleta_residencial (
+CREATE TABLE IF NOT EXISTS residential_collection (
   id VARCHAR(36) PRIMARY KEY,
-  id_ponto_coleta UUID NOT NULL,
-  data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  descricao TEXT,
+  collected_by CHAR(36) NULL,
+  material_type_id INT NOT NULL,
+  collected_at TIMESTAMP NULL,
+  collect_type ENUM('weight', 'unit') NOT NULL,
+  quantity DECIMAL(10,2) NOT NULL,
+  observation TEXT,
+  active BOOLEAN DEFAULT TRUE,
+  collection_location_id CHAR(36) NOT NULL,
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  description TEXT,
   status ENUM('pending', 'completed', 'cancelled', 'rejected') NOT NULL DEFAULT 'pending',
-  data_desativacao TIMESTAMP NULL,
-  justificativa_desativacao TEXT,
-  FOREIGN KEY (id) REFERENCES coleta(id) ON DELETE CASCADE,
-  FOREIGN KEY (id_ponto_coleta) REFERENCES ponto_coleta(id) ON DELETE RESTRICT
+  deactivation_at TIMESTAMP NULL,
+  deactivation_justification TEXT,
+  FOREIGN KEY (collected_by) REFERENCES contract(id) ON DELETE SET NULL,
+  FOREIGN KEY (material_type_id) REFERENCES material_type(id) ON DELETE RESTRICT,
+  FOREIGN KEY (collection_location_id) REFERENCES collection_location(id) ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS coleta_presencial (
+CREATE TABLE IF NOT EXISTS in_person_collection (
   id VARCHAR(36) PRIMARY KEY,
-  FOREIGN KEY (id) REFERENCES coleta(id) ON DELETE CASCADE
+  collected_by CHAR(36) NULL,
+  material_type_id INT NOT NULL,
+  collected_at TIMESTAMP NULL,
+  collect_type ENUM('weight', 'unit') NOT NULL,
+  quantity DECIMAL(10,2) NOT NULL,
+  observation TEXT,
+  active BOOLEAN DEFAULT TRUE,
+  FOREIGN KEY (collected_by) REFERENCES contract(id) ON DELETE SET NULL,
+  FOREIGN KEY (material_type_id) REFERENCES material_type(id) ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS tipo_premio (
+CREATE TABLE IF NOT EXISTS prize_claim (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(100) NOT NULL,
-  descricao VARCHAR(500) NOT NULL,
-  custo_pontos INT NOT NULL,
-  ativo BOOLEAN DEFAULT TRUE
-);
-
-CREATE TABLE IF NOT EXISTS reivindicacao_premio (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  id_pessoa UUID NOT NULL,
-  id_tipo_premio INT NOT NULL,
-  id_ponto_coleta UUID NOT NULL,
+  claimed_by CHAR(36) NOT NULL,
+  prize_type_id INT NOT NULL,
   status ENUM('pending', 'finished', 'cancelled', 'rejected') NOT NULL DEFAULT 'pending',
-  data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  data_realizacao TIMESTAMP NULL,
-  FOREIGN KEY (id_pessoa) REFERENCES pessoa(id) ON DELETE RESTRICT,
-  FOREIGN KEY (id_tipo_premio) REFERENCES tipo_premio(id) ON DELETE RESTRICT,
-  FOREIGN KEY (id_ponto_coleta) REFERENCES ponto_coleta(id) ON DELETE RESTRICT
+  claimed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  collected_at TIMESTAMP NULL,
+  FOREIGN KEY (claimed_by) REFERENCES collection_location(id) ON DELETE RESTRICT,
+  FOREIGN KEY (prize_type_id) REFERENCES prize_type(id) ON DELETE RESTRICT
 );
 
-CREATE INDEX idx_pessoa_email ON pessoa(email);
-CREATE INDEX idx_pessoa_cpf ON pessoa(cpf);
-CREATE INDEX idx_pessoa_ativo ON pessoa(ativo);
-CREATE INDEX idx_vinculo_pessoa ON vinculo(id_pessoa);
-CREATE INDEX idx_vinculo_status ON vinculo(status);
-CREATE INDEX idx_vinculo_respondido_por ON vinculo(id_respondido_por);
-CREATE INDEX idx_vinculo_encerrado_por ON vinculo(id_encerrado_por);
-CREATE INDEX idx_pontocoleta_email ON ponto_coleta(email_responsavel);
-CREATE INDEX idx_pontocoleta_cep ON ponto_coleta(cep);
-CREATE INDEX idx_pontocoleta_ativo ON ponto_coleta(ativo);
-CREATE INDEX idx_material_nome ON tipo_material(nome);
-CREATE INDEX idx_coleta_vinculo ON coleta(id_vinculo);
-CREATE INDEX idx_coleta_material ON coleta(id_tipo_material);
-CREATE INDEX idx_coleta_data ON coleta(data_coleta);
-CREATE INDEX idx_coleta_residencial_status ON coleta_residencial(status);
-CREATE INDEX idx_coleta_residencial_ponto ON coleta_residencial(id_ponto_coleta);
-CREATE INDEX idx_reivindicacao_status ON reivindicacao_premio(status);
-CREATE INDEX idx_reivindicacao_pessoa ON reivindicacao_premio(id_pessoa);
-CREATE INDEX idx_reivindicacao_premio ON reivindicacao_premio(id_tipo_premio);
-CREATE INDEX idx_tipo_premio_ativo ON tipo_premio(ativo);
+CREATE INDEX idx_person_email ON person(email);
+CREATE INDEX idx_person_cpf ON person(cpf);
+CREATE INDEX idx_person_active ON person(active);
+CREATE INDEX idx_contract_person ON contract(person_id);
+CREATE INDEX idx_contract_status ON contract(status);
+CREATE INDEX idx_contract_responded_by ON contract(responded_by_id);
+CREATE INDEX idx_contract_end_by ON contract(contract_end_by);
+CREATE INDEX idx_collection_location_email ON collection_location(responsable_email);
+CREATE INDEX idx_collection_location_cep ON collection_location(cep);
+CREATE INDEX idx_collection_location_active ON collection_location(active);
+CREATE INDEX idx_material_type_name ON material_type(name);
+CREATE INDEX idx_residential_collection_collected_by ON residential_collection(collected_by);
+CREATE INDEX idx_residential_collection_material ON residential_collection(material_type_id);
+CREATE INDEX idx_residential_collection_status ON residential_collection(status);
+CREATE INDEX idx_residential_collection_location ON residential_collection(collection_location_id);
+CREATE INDEX idx_in_person_collection_collected_by ON in_person_collection(collected_by);
+CREATE INDEX idx_in_person_collection_material ON in_person_collection(material_type_id);
+CREATE INDEX idx_prize_claim_status ON prize_claim(status);
+CREATE INDEX idx_prize_claim_claimed_by ON prize_claim(claimed_by);
+CREATE INDEX idx_prize_claim_prize_type ON prize_claim(prize_type_id);
+CREATE INDEX idx_prize_type_active ON prize_type(active);
 SQL;
   }
 }

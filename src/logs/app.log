@@ -1,0 +1,24 @@
+[2026-09-01 02:14:39] ERROR: Error connecting to MySQL {"error":"could not find driver"}
+[2026-09-01 02:20:46] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
+[2026-09-01 02:20:47] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
+[2026-09-01 02:20:47] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
+[2026-09-01 02:21:15] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
+[2026-09-01 02:21:17] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
+[2026-09-01 02:21:17] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
+[2026-09-01 02:21:17] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
+[2026-09-01 02:21:17] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
+[2026-09-01 02:21:18] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
+[2026-09-01 02:24:29] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:24:31] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:24:51] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:26:07] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:31:26] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:31:45] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:31:46] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:31:46] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:31:46] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:31:50] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:31:50] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:31:50] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:31:51] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 02:31:51] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}

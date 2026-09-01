@@ -13,8 +13,13 @@ class PrizeTypeValidator extends BaseValidator {
   private const MAX_NAME_LENGTH = 100;
   private const MAX_DESCRIPTION_LENGTH = 500;
   
-  public function validate(PrizeTypeModel $obj): array {
+  public function validate($obj): array {
     $this->errors = [];
+
+    if (!$obj instanceof PrizeTypeModel) {
+      $this->errors[] = "The object must be an instance of PrizeTypeModel.";
+      return $this->errors;
+    }
 
     $attributes = $obj->get_attributes();
     $cast_types = $obj->get_cast_types();
@@ -77,6 +82,10 @@ class PrizeTypeValidator extends BaseValidator {
     $cast_types = $obj->get_cast_types();
 
     foreach ($fillables as $field) {
+      if (!isset($attributes[$field])) {
+        continue;
+      }
+      
       $value = $attributes[$field];
 
       if ($value instanceof NeutralValue || $value === null) {
@@ -100,21 +109,21 @@ class PrizeTypeValidator extends BaseValidator {
       }
     }
 
-    if (in_array('name', $fillables) && !$attributes['name'] instanceof NeutralValue) {
+    if (in_array('name', $fillables) && isset($attributes['name']) && !$attributes['name'] instanceof NeutralValue) {
       $name_len = mb_strlen((string) $attributes['name']);
       if ($name_len < 2 || $name_len > self::MAX_NAME_LENGTH) {
         $this->errors['name'] = "The name field must be between 2 and " . self::MAX_NAME_LENGTH . " characters.";
       }
     }
 
-    if (in_array('description', $fillables) && !$attributes['description'] instanceof NeutralValue) {
+    if (in_array('description', $fillables) && isset($attributes['description']) && !$attributes['description'] instanceof NeutralValue) {
       $description_len = mb_strlen((string) $attributes['description']);
       if ($description_len < 5 || $description_len > self::MAX_DESCRIPTION_LENGTH) {
         $this->errors['description'] = "The description field must be between 5 and " . self::MAX_DESCRIPTION_LENGTH . " characters.";
       }
     }
 
-    if (in_array('cost_points', $fillables) && !$attributes['cost_points'] instanceof NeutralValue) {
+    if (in_array('cost_points', $fillables) && isset($attributes['cost_points']) && !$attributes['cost_points'] instanceof NeutralValue) {
       if ((int) $attributes['cost_points'] < 0) {
         $this->errors['cost_points'] = "The cost_points field must be greater than or equal to 0.";
       }

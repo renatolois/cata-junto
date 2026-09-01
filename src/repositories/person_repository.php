@@ -9,7 +9,7 @@ use App\Core\Utils\NeutralValue;
 
 class PersonRepository extends BaseRepository {
 
-  protected string $table = 'pessoa';
+  protected string $table = 'person';
 
   public function find_by_id(string $id): ?PersonModel {
     $result = $this->db->select($this->table, ['id' => $id]);
@@ -27,15 +27,12 @@ class PersonRepository extends BaseRepository {
   }
 
   public function find_all_active(): array {
-    $result = $this->db->select($this->table, ['ativo' => 1]);
+    $result = $this->db->select($this->table, ['active' => 1]);
     return array_map([$this, 'hydrate'], $result);
   }
 
-  public function search_by_name(string $name): array {
-    $sql = "SELECT * FROM {$this->table} WHERE nome LIKE ?";
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute(["%{$name}%"]);
-    $result = $stmt->fetchAll();
+  public function find_all(): array {
+    $result = $this->db->select($this->table);
     return array_map([$this, 'hydrate'], $result);
   }
 
@@ -56,14 +53,7 @@ class PersonRepository extends BaseRepository {
   }
 
   public function delete_person(string $id): bool {
-    return $this->db->update($this->table, $id, ['ativo' => 0]);
-  }
-
-  public function count(): int {
-    $sql = "SELECT COUNT(*) as total FROM {$this->table}";
-    $stmt = $this->db->query($sql);
-    $result = $stmt->fetch();
-    return (int) $result['total'];
+    return $this->db->update($this->table, $id, ['active' => 0]);
   }
 
   public function hydrate(array $data): PersonModel {
@@ -71,14 +61,14 @@ class PersonRepository extends BaseRepository {
 
     $person->set_id($data['id'] ?? null);
     $person->set_cpf($data['cpf'] ?? NeutralValue::instance());
-    $person->set_name($data['nome'] ?? NeutralValue::instance());
+    $person->set_name($data['name'] ?? NeutralValue::instance());
     $person->set_email($data['email'] ?? NeutralValue::instance());
-    $person->set_phone_number($data['telefone'] ?? NeutralValue::instance());
-    $person->set_birth_date($data['data_nascimento'] ?? NeutralValue::instance());
-    $person->set_current_points($data['pontos_atuais'] ?? 0);
-    $person->set_active($data['ativo'] ?? true);
-    $person->set_verified_email($data['email_verificado'] ?? false);
-    $person->set_password_hash($data['senha_hash'] ?? NeutralValue::instance());
+    $person->set_phone_number($data['phone_number'] ?? NeutralValue::instance());
+    $person->set_birth_date($data['birth_date'] ?? NeutralValue::instance());
+    $person->set_current_points((int) ($data['current_points'] ?? 0));
+    $person->set_active((bool) ($data['active'] ?? true));
+    $person->set_verified_email((bool) ($data['verified_email'] ?? false));
+    $person->set_password_hash($data['password_hash'] ?? NeutralValue::instance());
 
     return $person;
   }
@@ -95,7 +85,7 @@ class PersonRepository extends BaseRepository {
     }
 
     if (isset($data['name'])) {
-      $mapped['nome'] = $data['name'] instanceof NeutralValue ? null : $data['name'];
+      $mapped['name'] = $data['name'] instanceof NeutralValue ? null : $data['name'];
     }
 
     if (isset($data['email'])) {
@@ -103,43 +93,29 @@ class PersonRepository extends BaseRepository {
     }
 
     if (isset($data['phone_number'])) {
-      $mapped['telefone'] = $data['phone_number'] instanceof NeutralValue ? null : $data['phone_number'];
+      $mapped['phone_number'] = $data['phone_number'] instanceof NeutralValue ? null : $data['phone_number'];
     }
 
     if (isset($data['birth_date'])) {
-      $mapped['data_nascimento'] = $data['birth_date'] instanceof NeutralValue ? null : $data['birth_date'];
+      $mapped['birth_date'] = $data['birth_date'] instanceof NeutralValue ? null : $data['birth_date'];
     }
 
     if (isset($data['current_points'])) {
-      $mapped['pontos_atuais'] = $data['current_points'];
+      $mapped['current_points'] = (int) $data['current_points'];
     }
 
     if (isset($data['active'])) {
-      $mapped['ativo'] = (int) $data['active'];
+      $mapped['active'] = (int) $data['active'];
     }
 
     if (isset($data['verified_email'])) {
-      $mapped['email_verificado'] = (int) $data['verified_email'];
+      $mapped['verified_email'] = (int) $data['verified_email'];
     }
 
     if (isset($data['password_hash'])) {
-      $mapped['senha_hash'] = $data['password_hash'] instanceof NeutralValue ? null : $data['password_hash'];
+      $mapped['password_hash'] = $data['password_hash'] instanceof NeutralValue ? null : $data['password_hash'];
     }
 
     return $mapped;
-  }
-
-  private function generate_uuid(): string {
-    return sprintf(
-      '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-      mt_rand(0, 0xffff),
-      mt_rand(0, 0xffff),
-      mt_rand(0, 0xffff),
-      mt_rand(0, 0x0fff) | 0x4000,
-      mt_rand(0, 0x3fff) | 0x8000,
-      mt_rand(0, 0xffff),
-      mt_rand(0, 0xffff),
-      mt_rand(0, 0xffff)
-    );
   }
 }

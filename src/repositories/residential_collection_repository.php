@@ -50,13 +50,6 @@ class ResidentialCollectionRepository extends BaseRepository {
     return $this->db->update($this->table, $id, ['status' => 'inactive']);
   }
 
-  public function count(): int {
-    $sql = "SELECT COUNT(*) as total FROM {$this->table}";
-    $stmt = $this->db->query($sql);
-    $result = $stmt->fetch();
-    return (int) $result['total'];
-  }
-
   public function hydrate(array $data): ResidentialCollectionModel {
     $collection = new ResidentialCollectionModel();
 

@@ -10,13 +10,8 @@ use App\Repositories\MaterialTypeRepository;
 
 class MaterialTypeService extends BaseService {
 
-  private MaterialTypeRepository $repository;
-  private MaterialTypeValidator $validator;
-
   public function __construct(MaterialTypeRepository $repository, MaterialTypeValidator $validator) {
     parent::__construct($repository, $validator);
-    $this->repository = $repository;
-    $this->validator = $validator;
   }
 
   private function hydrate_and_validate(array $data): array {
@@ -40,7 +35,7 @@ class MaterialTypeService extends BaseService {
     return $result;
   }
 
-  public function update(int $pk, array $data): array|MaterialTypeModel {
+  public function update(int|string $pk, array $data): array|MaterialTypeModel {
     $materialType = $this->repository->find_by_id($pk);
     if ($materialType === null) {
       return ["errors" => ["service_error" => "Material type not found."]];
@@ -90,10 +85,6 @@ class MaterialTypeService extends BaseService {
 
   public function find_all(): array {
     return $this->repository->find_all();
-  }
-
-  public function count(): int {
-    return $this->repository->count();
   }
 
   public function activate_weight(int $pk): bool|array {

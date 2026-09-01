@@ -12,13 +12,12 @@ class PrizeClaimModel extends BaseModel {
         ['id', 'int'],
         ['claimed_by', 'uuid'],
         ['prize_type_id', 'int'],
-        ['collection_location_id', 'uuid'],
         ['status', 'string'],
         ['claimed_at', 'datetime'],
         ['collected_at', 'datetime']
       ],
       fillables: [
-        'claimed_by', 'prize_type_id', 'collection_location_id', 'status', 
+        'claimed_by', 'prize_type_id', 'status', 
         'claimed_at', 'collected_at'
       ],
       hiddens: []
@@ -41,10 +40,6 @@ class PrizeClaimModel extends BaseModel {
     return (int) $this->prize_type_id;
   }
 
-  public function get_collection_point_id(): string {
-    return $this->collection_point_id;
-  }
-
   public function get_status(): string {
     return $this->status;
   }
@@ -65,10 +60,6 @@ class PrizeClaimModel extends BaseModel {
     $this->prize_type_id = $prize_type_id;
   }
 
-  public function set_collection_point_id(string $collection_point_id): void {
-    $this->collection_point_id = $collection_point_id;
-  }
-
   public function set_status(string $status): void {
     $this->status = $status;
   }
@@ -81,9 +72,9 @@ class PrizeClaimModel extends BaseModel {
     $this->collected_at = $collected_at;
   }
 
-  public function finish(): void {
+  public function complete(): void {
     if ($this->status !== 'pending') {
-      throw new \Exception("Only pending claims can be finished.");
+      throw new \Exception("Only pending claims can be completed.");
     }
 
     $this->status = 'finished';

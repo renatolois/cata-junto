@@ -3,11 +3,9 @@ declare(strict_types=1);
 
 namespace Db;
 
-require "../core/app_constants.php";
-require "../core/base/base_adapter.php";
-
+use Core\Utils\AppConstants;
+use Core\Base\BaseAdapter;
 use \RuntimeException;
-use Core\AppConstants;
 
 class Database {
   private const DB_TYPE = AppConstants::DB_TYPE;
@@ -16,16 +14,16 @@ class Database {
   public function __construct() {
     switch(self::DB_TYPE) {
       case 'mysql':
-        require_once "../db/adapters/mysql_adapter.php";
-        $this->adapter = new MysqlAdapter();
+        require_once __DIR__ . '/adapters/mysql_adapter.php';
+        $this->adapter = new \Db\Adapters\MysqlAdapter();
         break;
       case 'postgresql':
-        require_once "../db/adapters/postgresql_adapter.php";
-        $this->adapter = new PostgresqlAdapter();
+        require_once __DIR__ . '/adapters/postgresql_adapter.php';
+        $this->adapter = new \Db\Adapters\PostgresqlAdapter();
         break;
       case 'supabase':
-        require_once "../db/adapters/supabase_adapter.php";
-        $this->adapter = new SupabaseAdapter();
+        require_once __DIR__ . '/adapters/supabase_adapter.php';
+        $this->adapter = new \Db\Adapters\SupabaseAdapter();
         break;
       default:
         throw new RuntimeException("Unrecognized database type: {$DB_TYPE}");

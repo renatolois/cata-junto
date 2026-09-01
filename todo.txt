@@ -1,1 +1,2 @@
-adicionar verificacao de usuario na service
+## adicionar verificacao de usuario na service
+verificar pq a senha do mysql nao ta indo

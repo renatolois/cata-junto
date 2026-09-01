@@ -26,11 +26,6 @@ class PrizeClaimRepository extends BaseRepository {
     return array_map([$this, 'hydrate'], $result);
   }
 
-  public function find_by_collection_point_id(string $collection_point_id): array {
-    $result = $this->db->select($this->table, ['collection_point_id' => $collection_point_id]);
-    return array_map([$this, 'hydrate'], $result);
-  }
-
   public function find_by_status(string $status): array {
     $result = $this->db->select($this->table, ['status' => $status]);
     return array_map([$this, 'hydrate'], $result);
@@ -58,20 +53,12 @@ class PrizeClaimRepository extends BaseRepository {
     return $this->db->delete($this->table, $id);
   }
 
-  public function count(): int {
-    $sql = "SELECT COUNT(*) as total FROM {$this->table}";
-    $stmt = $this->db->query($sql);
-    $result = $stmt->fetch();
-    return (int) $result['total'];
-  }
-
   public function hydrate(array $data): PrizeClaimModel {
     $prize_claim = new PrizeClaimModel();
 
     $prize_claim->set_id($data['id'] ?? null);
     $prize_claim->set_claimed_by($data['claimed_by'] ?? NeutralValue::instance());
     $prize_claim->set_prize_type_id((int) ($data['prize_type_id'] ?? 0));
-    $prize_claim->set_collection_point_id($data['collection_point_id'] ?? NeutralValue::instance());
     $prize_claim->set_status($data['status'] ?? 'pending');
     $prize_claim->set_claimed_at($data['claimed_at'] ?? NeutralValue::instance());
     $prize_claim->set_collected_at($data['collected_at'] ?? NeutralValue::instance());
@@ -92,10 +79,6 @@ class PrizeClaimRepository extends BaseRepository {
 
     if (isset($data['prize_type_id'])) {
       $mapped['prize_type_id'] = $data['prize_type_id'];
-    }
-
-    if (isset($data['collection_point_id'])) {
-      $mapped['collection_point_id'] = $data['collection_point_id'] instanceof NeutralValue ? null : $data['collection_point_id'];
     }
 
     if (isset($data['status'])) {

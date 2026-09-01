@@ -10,14 +10,19 @@ use App\Core\Utils\NeutralValue;
 
 class PrizeClaimValidator extends BaseValidator {
   
-  private const ALLOWED_STATUSES = ['pending', 'finished', 'cancelled', 'rejected', 'inactive'];
+  private const ALLOWED_STATUSES = ['pending', 'completed', 'cancelled', 'rejected', 'inactive'];
   
   private array $optional_fields = [
     'collected_at'
   ];
   
-  public function validate(PrizeClaimModel $obj): array {
+  public function validate($obj): array {
     $this->errors = [];
+
+    if (!$obj instanceof PrizeClaimModel) {
+      $this->errors[] = "The object must be an instance of RoleModel.";
+      return $this->errors;
+    }
 
     $attributes = $obj->get_attributes();
     $cast_types = $obj->get_cast_types();

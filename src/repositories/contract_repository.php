@@ -37,37 +37,48 @@ class ContractRepository extends BaseRepository {
   }
 
   public function find_pending_by_person_and_role(string $person_id, int $role_id): ?ContractModel {
-    $sql = "SELECT * FROM {$this->table} 
-            WHERE person_id = :person_id 
-              AND role_id = :role_id 
-              AND status = 'pending' 
-            LIMIT 1";
-    $stmt = $this->db->query($sql, ['person_id' => $person_id, 'role_id' => $role_id]);
-    $data = $stmt->fetch();
+    $results = $this->db->select_where(
+      $this->table,
+      [
+        'person_id' => $person_id,
+        'role_id'   => $role_id,
+        'status'    => 'pending'
+      ],
+      ['limit' => 1]
+    );
+    $data = $results[0] ?? null;
     return $data ? $this->hydrate($data) : null;
   }
-
+  
   public function find_active_by_person_and_role(string $person_id, int $role_id): ?ContractModel {
-    $sql = "SELECT * FROM {$this->table} 
-            WHERE person_id = :person_id 
-              AND role_id = :role_id 
-              AND status = 'approved' 
-              AND contract_end_at IS NULL 
-            LIMIT 1";
-    $stmt = $this->db->query($sql, ['person_id' => $person_id, 'role_id' => $role_id]);
-    $data = $stmt->fetch();
+    $results = $this->db->select_where(
+      $this->table,
+      [
+        'person_id'       => $person_id,
+        'role_id'         => $role_id,
+        'status'          => 'approved',
+        'contract_end_at' => null
+      ],
+      ['limit' => 1]
+    );
+    $data = $results[0] ?? null;
     return $data ? $this->hydrate($data) : null;
   }
-
+  
   public function find_last_rejection_for_person_and_role(string $person_id, int $role_id): ?ContractModel {
-    $sql = "SELECT * FROM {$this->table} 
-            WHERE person_id = :person_id 
-              AND role_id = :role_id 
-              AND status = 'rejected' 
-            ORDER BY responded_at DESC 
-            LIMIT 1";
-    $stmt = $this->db->query($sql, ['person_id' => $person_id, 'role_id' => $role_id]);
-    $data = $stmt->fetch();
+    $results = $this->db->select_where(
+      $this->table,
+      [
+        'person_id' => $person_id,
+        'role_id'   => $role_id,
+        'status'    => 'rejected'
+      ],
+      [
+        'order_by' => 'responded_at DESC',
+        'limit'    => 1
+      ]
+    );
+    $data = $results[0] ?? null;
     return $data ? $this->hydrate($data) : null;
   }
 

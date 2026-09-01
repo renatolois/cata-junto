@@ -12,8 +12,13 @@ class RoleValidator extends BaseValidator {
   
   private const MAX_NAME_LENGTH = 50;
   
-  public function validate(RoleModel $obj): array {
+  public function validate($obj): array {
     $this->errors = [];
+
+    if (!$obj instanceof RoleModel) {
+      $this->errors[] = "The object must be an instance of RoleModel.";
+      return $this->errors;
+    }
 
     $attributes = $obj->get_attributes();
     $cast_types = $obj->get_cast_types();

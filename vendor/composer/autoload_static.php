@@ -46,10 +46,20 @@ class ComposerStaticInit11369a741405180dc00a7c0a5edec73f
         'D' =>
         array (
             'Dotenv\\' => 7,
+            'Db\\' => 3,
+        ),
+        'C' =>
+        array (
+            'Core\\Utils\\' => 11,
+            'Core\\' => 5,
         ),
         'B' =>
         array (
             'Bayfront\\MimeTypes\\' => 19,
+        ),
+        'A' =>
+        array (
+            'App\\' => 4,
         ),
     );
 
@@ -116,9 +126,25 @@ class ComposerStaticInit11369a741405180dc00a7c0a5edec73f
         array (
             0 => __DIR__ . '/..' . '/vlucas/phpdotenv/src',
         ),
+        'Db\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/src/db',
+        ),
+        'Core\\Utils\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/src/core/utils',
+        ),
+        'Core\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/src/core',
+        ),
         'Bayfront\\MimeTypes\\' =>
         array (
             0 => __DIR__ . '/..' . '/bayfrontmedia/php-mime-types/src',
+        ),
+        'App\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 

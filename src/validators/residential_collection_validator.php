@@ -19,8 +19,13 @@ class ResidentialCollectionValidator extends BaseValidator {
     'description', 'deactivation_at', 'deactivation_justification'
   ];
   
-  public function validate(ResidentialCollectionModel $obj): array {
+  public function validate($obj): array {
     $this->errors = [];
+
+    if (!$obj instanceof ResidentailCollectionModel) {
+      $this->errors[] = "The object must be an instance of RoleModel.";
+      return $this->errors;
+    }
 
     $attributes = $obj->get_attributes();
     $cast_types = $obj->get_cast_types();

@@ -4,43 +4,43 @@ declare(strict_types=1);
 namespace Core\Utils;
 
 class Logger {
-  private static string $logFile = __DIR__ . '/../../logs/app.log';
-  private static string $logLevel = 'all'; // all, info, warning, error
+  private static string $log_file = __DIR__ . '/../../logs/app.log';
+  private static string $log_level = 'all'; // all, info, warning, error
   
-  public static function setLogLevel(string $level): void {
+  public static function set_log_level(string $level): void {
     $allowed = ['all', 'info', 'warning', 'error'];
     if (in_array($level, $allowed)) {
-      self::$logLevel = $level;
+      self::$log_level = $level;
     }
   }
   
-  private static function shouldLog(string $level): bool {
+  private static function should_log(string $level): bool {
     static $levels = ['all' => 0, 'info' => 1, 'warning' => 2, 'error' => 3];
-    $current = $levels[self::$logLevel] ?? 0;
+    $current = $levels[self::$log_level] ?? 0;
     $target = $levels[$level] ?? 0;
     return $target >= $current;
   }
   
   public static function all(string $message, array $context = []): void {
-    if (self::shouldLog('all')) {
+    if (self::should_log('all')) {
       self::write('ALL', $message, $context);
     }
   }
   
   public static function info(string $message, array $context = []): void {
-    if (self::shouldLog('info')) {
+    if (self::should_log('info')) {
       self::write('INFO', $message, $context);
     }
   }
   
   public static function warning(string $message, array $context = []): void {
-    if (self::shouldLog('warning')) {
+    if (self::should_log('warning')) {
       self::write('WARNING', $message, $context);
     }
   }
   
   public static function error(string $message, array $context = []): void {
-    if (self::shouldLog('error')) {
+    if (self::should_log('error')) {
       self::write('ERROR', $message, $context);
     }
   }
@@ -54,15 +54,15 @@ class Logger {
       !empty($context) ? json_encode($context) : ''
     );
     
-    $logDir = dirname(self::$logFile);
-    if (!is_dir($logDir)) {
-      mkdir($logDir, 0755, true);
+    $log_dir = dirname(self::$log_file);
+    if (!is_dir($log_dir)) {
+      mkdir($log_dir, 0755, true);
     }
     
-    error_log($log, 3, self::$logFile);
+    error_log($log, 3, self::$log_file);
   }
   
-  public static function setLogFile(string $file): void {
-    self::$logFile = $file;
+  public static function set_log_file(string $file): void {
+    self::$log_file = $file;
   }
 }
