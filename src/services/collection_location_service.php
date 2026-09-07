@@ -12,13 +12,7 @@ class CollectionLocationService extends BaseService {
   public function __construct(CollectionLocationRepository $repository, CollectionLocationValidator $validator) {
     parent::__construct($repository, $validator);
   }
-
-  private function hydrate_and_validate(array $data): array {
-    $collectionLocation = $this->repository->hydrate($data);
-    $errors = $this->validator->validate($collectionLocation);
-    return [$collectionLocation, $errors];
-  }
-
+  
   public function create(array $data): array|CollectionLocationModel {
 		[$collectionLocation, $errors] = $this->hydrate_and_validate($data);
 
@@ -82,6 +76,10 @@ class CollectionLocationService extends BaseService {
 
   public function find_by_email(string $email): ?CollectionLocationModel {
     return $this->repository->find_by_email($email);
+  }
+
+  public function find_by_cep(string $cep): ?CollectionLocationModel {
+    return $this->repository->find_by_cep($cep);
   }
 
   public function find_all_active(): array {

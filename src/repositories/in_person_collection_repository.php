@@ -72,6 +72,7 @@ class InPersonCollectionRepository extends BaseRepository {
     $collection->set_quantity((float) ($data['quantity'] ?? 0));
     $collection->set_observation($data['observation'] ?? NeutralValue::instance());
     $collection->set_active((bool) ($data['active'] ?? true));
+    $collection->set_paid_value((float) ($data['paid_value'] ?? 0.0));
 
     return $collection;
   }
@@ -109,6 +110,10 @@ class InPersonCollectionRepository extends BaseRepository {
 
     if (isset($data['active'])) {
       $mapped['active'] = (int) $data['active'];
+    }
+
+    if (isset($data['paid_value'])) {
+      $mapped['paid_value'] = $data['paid_value'] instanceof NeutralValue ? null : (float) $data['paid_value'];
     }
 
     return $mapped;

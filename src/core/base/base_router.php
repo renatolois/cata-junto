@@ -1,68 +1,71 @@
-<?php 
+<?php
 declare(strict_types=1);
+
 namespace Core\Base;
 
 abstract class BaseRouter {
-  protected $routes = [];
+  protected array $routes = [];
+  protected object $controller;
 
-  public function set_route(string $method, string $route, string $actions): void {
-    $pattern = preg_replace('/\{([a-z]+)\}/', '(?P<$1>[^/]+)', $route);
+  public function __construct(object $controller) {
+    $this->controller = $controller;
+  }
+
+  public function set_route(string $method, string $route, string $action): void {
+    $pattern = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', '(?P<$1>[^/]+)', $route);
     $pattern = '#^' . $pattern . '$#';
     
-    $this->routes[$method][$route] = [
-      'action' => $actions,
+    $this->routes[strtoupper($method)][] = [
+      'route' => $route,
+      'action' => $action,
       'regex' => $pattern
     ];
   }
 
-  public function call(string $action): void {
+  protected function call(string $action, array $params = []): void {
     [$controller, $method] = explode('@', $action);
-
-    $controllerClassFile = __DIR__ . "/../../core/$controller.php";
     
-    if (!file_exists($controllerClassFile)) {
-      http_response_code(404);
-      echo "Controller not found";
-      return;
-    }
-
-    require_once $controllerClassFile;
-
-    $controllerClass = "Core\\$controller";
-
-    if (!class_exists($controllerClass)) {
-      http_response_code(404);
-      echo "Not found";
-      return;
-    }
-
-    $instance = new $controllerClass();
+    // Usa o controller já instanciado
+    $instance = $this->controller;
     
-    if (method_exists($instance, $method)) {
-      $instance->$method();
-    } else {
+    if (!method_exists($instance, $method)) {
       http_response_code(404);
-      echo "Not found";
+      echo json_encode(['error' => 'Method not found']);
       return;
     }
+
+    // Seta os parâmetros da rota no controller
+    if (method_exists($instance, 'set_route_params')) {
+      $instance->set_route_params($params);
+    }
+
+    $instance->$method();
   }
 
   public function dispatch(string $method, string $uri): void {
+    $method = strtoupper($method);
     $uri_route = parse_url($uri, PHP_URL_PATH);
+    $uri_route = rtrim($uri_route, '/') ?: '/';
 
     if (!isset($this->routes[$method])) {
       http_response_code(405);
-      echo "Method not allowed";
+      echo json_encode(['error' => 'Method not allowed']);
       return;
     }
 
-    if (isset($this->routes[$method][$uri_route])) {
-      $this->call($this->routes[$method][$uri_route]['action']);
-      return;
+    foreach ($this->routes[$method] as $route) {
+      if (preg_match($route['regex'], $uri_route, $matches)) {
+        $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+        $this->call($route['action'], $params);
+        return;
+      }
     }
 
     http_response_code(404);
-    echo "Not found";
-    return;
+    echo json_encode(['error' => 'Route not found']);
+  }
+
+  public function get_routes(): array {
+    return $this->routes;
   }
 }

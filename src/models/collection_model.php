@@ -13,14 +13,15 @@ class CollectionModel extends BaseModel {
         ['collected_by', 'uuid'],
         ['material_type_id', 'int'],
         ['collected_at', 'datetime'],
-        ['collect_type', 'string'], // weight ou unit
+        ['collect_type', 'string'], // weight or unit
         ['quantity', 'float'],
         ['observation', 'string'],
-        ['active', 'bool']
+        ['active', 'bool'],
       ],
       fillables: [
         'collected_by', 'material_type_id', 'collected_at',
-        'collect_type', 'quantity', 'observation', 'active'
+        'collect_type', 'quantity', 'observation', 
+        'active', 'paid_value'
       ],
       hiddens: []
     );

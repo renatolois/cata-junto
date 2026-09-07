@@ -14,17 +14,18 @@ class MaterialTypeService extends BaseService {
     parent::__construct($repository, $validator);
   }
 
-  private function hydrate_and_validate(array $data): array {
-    $materialType = $this->repository->hydrate($data);
-    $errors = $this->validator->validate($materialType);
-    return [$materialType, $errors];
-  }
-
   public function create(array $data): array|MaterialTypeModel {
     [$materialType, $errors] = $this->hydrate_and_validate($data);
 
     if (!empty($errors)) {
       return ["errors" => $errors];
+    }
+
+    if (isset($data['name'])) {
+      $existing = $this->repository->find_by_name($data['name']);
+      if ($existing !== null) {
+        return ["errors" => ["name" => "Material type name already exists."]];
+      }
     }
 
     $result = $this->repository->create_material_type($materialType->get_attributes());
@@ -40,6 +41,14 @@ class MaterialTypeService extends BaseService {
     if ($materialType === null) {
       return ["errors" => ["service_error" => "Material type not found."]];
     }
+
+    if (isset($data['name'])) {
+      $existing = $this->repository->find_by_name($data['name']);
+      if ($existing !== null && $existing->get_id() !== $pk) {
+        return ["errors" => ["name" => "Material type name already in use by another material type."]];
+      }
+    }
+
 
     foreach ($data as $field => $value) {
       if (property_exists($materialType, $field)) {

@@ -14,17 +14,18 @@ class PrizeTypeService extends BaseService {
     parent::__construct($repository, $validator);
   }
 
-  private function hydrate_and_validate(array $data): array {
-    $prizeType = $this->repository->hydrate($data);
-    $errors = $this->validator->validate($prizeType);
-    return [$prizeType, $errors];
-  }
-
   public function create(array $data): array|PrizeTypeModel {
     [$prizeType, $errors] = $this->hydrate_and_validate($data);
 
     if (!empty($errors)) {
       return ["errors" => $errors];
+    }
+
+    if (isset($data['name'])) {
+      $existing = $this->repository->find_by_name($data['name']);
+      if ($existing !== null) {
+        return ["errors" => ["name" => "Prize type name already exists."]];
+      }
     }
 
     $result = $this->repository->create_prize_type($prizeType->get_attributes());
@@ -39,6 +40,13 @@ class PrizeTypeService extends BaseService {
     $prizeType = $this->repository->find_by_id($pk);
     if ($prizeType === null) {
       return ["errors" => ["service_error" => "Prize type not found."]];
+    }
+
+    if (isset($data['name'])) {
+      $existing = $this->repository->find_by_name($data['name']);
+      if ($existing !== null && $existing->get_id() !== $pk) {
+        return ["errors" => ["name" => "Prize type name already in use by another prize type."]];
+      }
     }
 
     foreach ($data as $field => $value) {

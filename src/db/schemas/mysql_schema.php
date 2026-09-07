@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS material_type (
 
 CREATE TABLE IF NOT EXISTS prize_type (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
+  name VARCHAR(100) NOT NULL UNIQUE,
   description VARCHAR(500) NOT NULL,
   cost_points INT NOT NULL,
   active BOOLEAN DEFAULT TRUE
@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS in_person_collection (
   collected_at TIMESTAMP NULL,
   collect_type ENUM('weight', 'unit') NOT NULL,
   quantity DECIMAL(10,2) NOT NULL,
+  paid_value FLOAT NOT NULL,
   observation TEXT,
   active BOOLEAN DEFAULT TRUE,
   FOREIGN KEY (collected_by) REFERENCES contract(id) ON DELETE SET NULL,

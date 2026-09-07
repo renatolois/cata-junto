@@ -4,11 +4,13 @@ declare(strict_types=1);
 namespace Core\Base;
 
 abstract class BaseController {
+  protected BaseService $service;
   protected array $body = [];
   protected array $query = [];
   protected array $route_params = [];
 
-  public function __construct() {
+  public function __construct(BaseService $service) {
+    $this->service = $service;
     $this->query = $_GET;
     $input = file_get_contents('php://input');
     
@@ -38,6 +40,13 @@ abstract class BaseController {
       return $this->query;
     }
     return $this->query[$key] ?? $default;
+  }
+
+  protected function get_route(?string $key = null, $default = null) {
+    if ($key === null) {
+      return $this->route_params;
+    }
+    return $this->route_params[$key] ?? $default;
   }
 
   protected function json_response(array $data, int $status_code = 200): void {

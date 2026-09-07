@@ -21,9 +21,9 @@ class CollectionLocationRepository extends BaseRepository {
     return empty($result) ? null : $this->hydrate($result[0]);
   }
 
-  public function find_by_cep(string $cep): array {
+  public function find_by_cep(string $cep): ?CollectionLocationModel {
     $result = $this->db->select($this->table, ['cep' => $cep]);
-    return array_map([$this, 'hydrate'], $result);
+    return empty($result) ? null : $this->hydrate($result[0]);
   }
 
   public function find_by_city(string $city): array {

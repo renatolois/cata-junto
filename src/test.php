@@ -36,12 +36,15 @@ require_once __DIR__ . '/core/base/base_model.php';
 require_once __DIR__ . '/core/base/base_service.php';
 require_once __DIR__ . '/core/base/base_validator.php';
 require_once __DIR__ . '/core/base/base_controller.php';
+require_once __DIR__ . '/core/base/base_router.php';
 
 // ============================================================
 // CONFIGURAÇÕES
 // ============================================================
-require_once __DIR__ . '/core/utils/app_constants.php';  // ADICIONADO
+require_once __DIR__ . '/core/utils/app_constants.php';
 require_once __DIR__ . '/core/utils/logger.php';
+require_once __DIR__ . '/core/utils/neutral_value.php';
+require_once __DIR__ . '/validators/utils/validator_utils.php';
 
 // ============================================================
 // BANCO DE DADOS
@@ -50,27 +53,49 @@ require_once __DIR__ . '/db/database.php';
 require_once __DIR__ . '/db/adapters/mysql_adapter.php';
 
 // ============================================================
-// MODELS, REPOSITÓRIOS, SERVICES, CONTROLLERS
+// MODELS, REPOSITÓRIOS, SERVICES, CONTROLLERS, ROUTERS
 // ============================================================
 require_once __DIR__ . '/models/person_model.php';
 require_once __DIR__ . '/repositories/person_repository.php';
 require_once __DIR__ . '/validators/person_validator.php';
 require_once __DIR__ . '/services/person_service.php';
 require_once __DIR__ . '/controllers/person_controller.php';
+require_once __DIR__ . '/routers/person_router.php';
 
 // ============================================================
 // USAR AS CLASSES
 // ============================================================
 use Db\Database;
+use App\Repositories\PersonRepository;
+use App\Validators\PersonValidator;
+use App\Services\PersonService;
+use App\Controllers\PersonController;
+use App\Routers\PersonRouter;
 
 // ============================================================
 // ROTEADOR
 // ============================================================
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-$path = rtrim($path, '/') ?: '/';
+$uri = $_SERVER['REQUEST_URI'] ?? '/';
+
+// REMOVE O /src/test.php DO INÍCIO DA URI
+$base_path = '/src/test.php';
+if (str_starts_with($uri, $base_path)) {
+    $uri = substr($uri, strlen($base_path));
+}
+
+// SE A URI FICOU VAZIA, DEFINE COMO '/'
+if (empty($uri) || $uri === '') {
+    $uri = '/';
+}
+
+// GARANTE QUE A URI COMEÇA COM '/'
+if (!str_starts_with($uri, '/')) {
+    $uri = '/' . $uri;
+}
 
 try {
+    // Conecta ao banco
     $db = new Database();
     $db->connect([
         'host' => $env['DB_HOST'] ?? 'localhost',
@@ -80,20 +105,18 @@ try {
         'password' => $env['DB_PASSWORD'] ?? ''
     ]);
 
-    $repository = new person_repository($db);
-    $validator = new person_validator();
-    $service = new person_service($repository, $validator);
-    $controller = new person_controller($service);
+    // Setup das dependências
+    $repository = new PersonRepository($db);
+    $validator = new PersonValidator();
+    $service = new PersonService($repository, $validator);
+    $controller = new PersonController($service);
 
-    // Rotas
-    if ($method === 'GET' && ($path === '/pessoas' || $path === '/person' || str_ends_with($path, '/pessoas'))) {
-        $controller->index();
-    } else {
-        http_response_code(404);
-        header('Content-Type: application/json');
-        echo json_encode(['error' => 'Rota não encontrada. Use GET /pessoas']);
-        exit;
-    }
+    // Registrar rotas no router
+    $router = new PersonRouter($controller);
+
+    // Dispatch da requisição
+    $router->dispatch($method, $uri);
+    
 } catch (Exception $e) {
     http_response_code(500);
     header('Content-Type: application/json');

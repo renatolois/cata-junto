@@ -29,12 +29,6 @@ class InPersonCollectionService extends BaseService {
     $this->person_service = $person_service;
   }
 
-  private function hydrate_and_validate(array $data): array {
-    $collection = $this->repository->hydrate($data);
-    $errors = $this->validator->validate($collection);
-    return [$collection, $errors];
-  }
-
   public function create(array $data): array|InPersonCollectionModel {
     [$collection, $errors] = $this->hydrate_and_validate($data);
     if (!empty($errors)) {
@@ -106,10 +100,6 @@ class InPersonCollectionService extends BaseService {
 
   public function find_all(): array {
     return $this->repository->find_all();
-  }
-
-  public function count(): int {
-    return $this->repository->count();
   }
 
   public function hard_delete(string $pk): bool|array {

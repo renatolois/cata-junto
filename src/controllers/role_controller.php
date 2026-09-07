@@ -4,18 +4,18 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use Core\Base\BaseController;
-use App\Services\PrizeTypeService;
+use App\Services\RoleService;
 
-class PrizeTypeController extends BaseController {
-  public function __construct(PrizeTypeService $service) {
+class RoleController extends BaseController {
+  public function __construct(RoleService $service) {
     parent::__construct($service);
   }
 
   /*
-  GET /prize-type
-  GET /prize-type?active=1
-  GET /prize-type?name=<NAME>
-  GET /prize-type?id=<ID>
+  GET /role
+  GET /role?active=1
+  GET /role?name=<NAME>
+  GET /role?id=<ID>
   */
   public function list(): void {
     $active = $this->get_query('active');
@@ -29,26 +29,26 @@ class PrizeTypeController extends BaseController {
     }
 
     if ($id !== null) {
-      $prize_type = $this->service->find_by_id((int) $id);
-      $this->json_response($prize_type ? $prize_type->to_array() : []);
+      $role = $this->service->find_by_id((int) $id);
+      $this->json_response($role ? $role->to_array() : []);
       return;
     } else if ($name !== null) {
-      $prize_type = $this->service->find_by_name($name);
-      $this->json_response($prize_type ? $prize_type->to_array() : []);
+      $role = $this->service->find_by_name($name);
+      $this->json_response($role ? $role->to_array() : []);
       return;
     } else if ($active !== null) {
       $active = filter_var($active, FILTER_VALIDATE_BOOLEAN);
-      $prize_types = $active ? $this->service->find_all_active() : $this->service->find_all();
-      $this->json_response(array_map(fn($p) => $p->to_array(), $prize_types));
+      $roles = $active ? $this->service->find_all_active() : $this->service->find_all();
+      $this->json_response(array_map(fn($r) => $r->to_array(), $roles));
       return;
     }
 
-    $prize_types = $this->service->find_all();
-    $this->json_response(array_map(fn($p) => $p->to_array(), $prize_types));
+    $roles = $this->service->find_all();
+    $this->json_response(array_map(fn($r) => $r->to_array(), $roles));
   }
 
   /*
-  POST /prize-type
+  POST /role
   */
   public function create(): void {
     $data = $this->get_body();
@@ -67,7 +67,7 @@ class PrizeTypeController extends BaseController {
   }
 
   /*
-  PUT /prize-type/{id}
+  PUT /role/{id}
   */
   public function update(): void {
     $id = $this->get_route('id');
@@ -92,7 +92,7 @@ class PrizeTypeController extends BaseController {
   }
 
   /*
-  DELETE /prize-type/{id}
+  DELETE /role/{id}
   */
   public function delete(): void {
     $id = $this->get_route('id');
@@ -107,11 +107,11 @@ class PrizeTypeController extends BaseController {
       return;
     }
 
-    $this->json_response(['message' => 'Prize type deleted successfully']);
+    $this->json_response(['message' => 'Role deleted successfully']);
   }
 
   /*
-  PUT /prize-type/{id}/activate
+  PUT /role/{id}/activate
   */
   public function activate(): void {
     $id = $this->get_route('id');
@@ -126,11 +126,11 @@ class PrizeTypeController extends BaseController {
       return;
     }
 
-    $this->json_response(['message' => 'Prize type activated successfully']);
+    $this->json_response(['message' => 'Role activated successfully']);
   }
 
   /*
-  PUT /prize-type/{id}/deactivate
+  PUT /role/{id}/deactivate
   */
   public function deactivate(): void {
     $id = $this->get_route('id');
@@ -145,6 +145,6 @@ class PrizeTypeController extends BaseController {
       return;
     }
 
-    $this->json_response(['message' => 'Prize type deactivated successfully']);
+    $this->json_response(['message' => 'Role deactivated successfully']);
   }
 }

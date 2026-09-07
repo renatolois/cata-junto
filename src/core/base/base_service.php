@@ -11,6 +11,12 @@ abstract class BaseService {
 	protected BaseRepository $repository;
 	protected BaseValidator  $validator;
 
+	protected function hydrate_and_validate(array $data): array {
+    $result = $this->repository->hydrate($data);
+    $errors = $this->validator->validate_fillables($result);
+    return [$result, $errors];
+  }
+
 	public function __construct(BaseRepository $repository, BaseValidator $validator) {
 		$this->repository = $repository;
 		$this->validator = $validator;

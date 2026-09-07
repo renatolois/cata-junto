@@ -1,24 +1,12 @@
-[2026-09-01 02:14:39] ERROR: Error connecting to MySQL {"error":"could not find driver"}
-[2026-09-01 02:20:46] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
-[2026-09-01 02:20:47] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
-[2026-09-01 02:20:47] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
-[2026-09-01 02:21:15] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
-[2026-09-01 02:21:17] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
-[2026-09-01 02:21:17] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
-[2026-09-01 02:21:17] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
-[2026-09-01 02:21:17] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
-[2026-09-01 02:21:18] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'"}
-[2026-09-01 02:24:29] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:24:31] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:24:51] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:26:07] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:31:26] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:31:45] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:31:46] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:31:46] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:31:46] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:31:50] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:31:50] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:31:50] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:31:51] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
-[2026-09-01 02:31:51] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO)"}
+[2026-09-01 19:13:14] ALL: MySQLAdapter initialized 
+[2026-09-01 19:13:14] INFO: MySQL connected successfully {"database":"cooperativa","user":"root"}
+[2026-09-01 19:13:14] ALL: Select from person {"where":[]}
+[2026-09-01 19:13:14] ALL: Select returned 0 records from person 
+[2026-09-01 19:13:24] ALL: MySQLAdapter initialized 
+[2026-09-01 19:13:24] INFO: MySQL connected successfully {"database":"cooperativa","user":"root"}
+[2026-09-01 19:13:25] ALL: Insert into person {"id":"","cpf":"11122233344","name":"Ana Paula Souza","email":"ana@teste.com","phone_number":"11666666666","birth_date":"1992-03-15","current_points":0,"active":1,"verified_email":0,"password_hash":"$2y$12$foxqHKJy21o3BU8.m\/MBVe4uY6I15BtdlgcW8FA6kgzKMXPQ.krpy"}
+[2026-09-01 19:13:25] INFO: Insert completed in person 
+[2026-09-01 19:13:25] ALL: select_by_id from person {"id":"0"}
+[2026-09-01 19:13:25] ALL: Select from person {"where":{"id":"0"}}
+[2026-09-01 19:13:25] ALL: Select returned 0 records from person 
+[2026-09-01 19:13:25] WARNING: Record not found {"table":"person","id":"0"}

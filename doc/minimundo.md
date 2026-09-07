@@ -51,6 +51,7 @@
 
 - ## Coleta Presencial
 *(Herda todos os atributos da classe Coleta)*
+- `Valor pago -> Float`
 
 - ## Coleta Residencial
 *(Herda os atributos da classe Coleta e adiciona os seguintes)*
@@ -156,3 +157,4 @@
 30. O sistema deve validar se o saldo disponível em `Quantidade de Pontos Agora` do local de coleta é maior ou igual ao `custo em pontos` do prêmio desejado antes de permitir a solicitação efetuando o respectivo desconto dos pontos do saldo. Se o saldo for insuficiente, a reivindicação deve ser rejeitada/impedida.
 31. Quando a reivindicação for atendida/entregue, o status deve ser atualizado para "concluído" (ou "entregue") e o campo `realizado em` deve ser preenchido.
 32. Uma reivindicação com status "cancelado" não pode ter seu status revertido para "pendente" ou "concluído", caso necessário, deve-se criar uma nova reivindicação.
+31. Uma vez rejeitada a reinvindicação, não é possível desmarcá-la como `rejeitado` em `status`

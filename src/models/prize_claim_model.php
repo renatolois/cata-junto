@@ -77,7 +77,7 @@ class PrizeClaimModel extends BaseModel {
       throw new \Exception("Only pending claims can be completed.");
     }
 
-    $this->status = 'finished';
+    $this->status = 'completed';
     $this->collected_at = date('Y-m-d H:i:s');
   }
 

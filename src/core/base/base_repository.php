@@ -37,7 +37,7 @@ abstract class BaseRepository {
     return $this->db->delete($this->table, $pk);
   }
 
-  protected function generate_uuid(): string {
+  public function generate_uuid(): string {
     return sprintf(
       '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
       mt_rand(0, 0xffff),

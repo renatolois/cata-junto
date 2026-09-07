@@ -30,12 +30,6 @@ class ResidentialCollectionService extends BaseService {
     $this->location_repository = $location_repository;
   }
 
-  private function hydrate_and_validate(array $data): array {
-    $collection = $this->repository->hydrate($data);
-    $errors = $this->validator->validate($collection);
-    return [$collection, $errors];
-  }
-
   public function create(array $data): array|ResidentialCollectionModel {
     [$collection, $errors] = $this->hydrate_and_validate($data);
 
@@ -51,6 +45,10 @@ class ResidentialCollectionService extends BaseService {
     $material = $this->material_type_repository->find_by_id($collection->get_material_type_id());
     if ($material === null) {
       return ["errors" => ["material_type_id" => "Material type not found."]];
+    }
+
+    if (!$material->is_active()) {
+      return ["errors" => ["material_type_id" => "Material type is not active."]];
     }
 
     $collection->set_status('pending');
@@ -286,10 +284,6 @@ class ResidentialCollectionService extends BaseService {
 
   public function find_all(): array {
     return $this->repository->find_all();
-  }
-
-  public function count(): int {
-    return $this->repository->count();
   }
 
   public function hard_delete(string $pk): bool|array {

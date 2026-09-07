@@ -59,7 +59,8 @@ class PersonRepository extends BaseRepository {
   public function hydrate(array $data): PersonModel {
     $person = new PersonModel();
 
-    $person->set_id($data['id'] ?? null);
+    $person->id = $data['id'] ?? null;
+    $person->password_hash = $data['password_hash'] ?? NeutralValue::instance();
     $person->set_cpf($data['cpf'] ?? NeutralValue::instance());
     $person->set_name($data['name'] ?? NeutralValue::instance());
     $person->set_email($data['email'] ?? NeutralValue::instance());
@@ -68,7 +69,6 @@ class PersonRepository extends BaseRepository {
     $person->set_current_points((int) ($data['current_points'] ?? 0));
     $person->set_active((bool) ($data['active'] ?? true));
     $person->set_verified_email((bool) ($data['verified_email'] ?? false));
-    $person->set_password_hash($data['password_hash'] ?? NeutralValue::instance());
 
     return $person;
   }

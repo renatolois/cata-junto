@@ -13,16 +13,24 @@ class PersonService extends BaseService {
     parent::__construct($repository, $validator);
   }
 
-  private function hydrate_and_validate(array $data): array {
-    $person = $this->repository->hydrate($data);
-    $errors = $this->validator->validate($person);
-    return [$person, $errors];
-  }
-
   public function create(array $data): array|PersonModel {
     [$person, $errors] = $this->hydrate_and_validate($data);
 
     if( !empty($errors) ) return ["errors" => $errors];
+
+    if (isset($data['email'])) {
+      $existing = $this->repository->find_by_email($data['email']);
+      if ($existing !== null) {
+        return ["errors" => ["email" => "Email already registered."]];
+      }
+    }
+
+    if (isset($data['cpf'])) {
+      $existing = $this->repository->find_by_cpf($data['cpf']);
+      if ($existing !== null) {
+        return ["errors" => ["cpf" => "CPF already registered."]];
+      }
+    }
 
     if (isset($data['password'])) {
       $person->set_password($data['password']);
@@ -40,6 +48,20 @@ class PersonService extends BaseService {
     $person = $this->repository->find_by_id($pk);
     if ($person === null) {
       return ["errors" => ["service_error" => "Person not found."]];
+    }
+
+    if (isset($data['email'])) {
+      $existing = $this->repository->find_by_email($data['email']);
+      if ($existing !== null && $existing->get_id() !== $pk) {
+        return ["errors" => ["email" => "Email already in use by another user."]];
+      }
+    }
+
+    if (isset($data['cpf'])) {
+      $existing = $this->repository->find_by_cpf($data['cpf']);
+      if ($existing !== null && $existing->get_id() !== $pk) {
+        return ["errors" => ["cpf" => "CPF already in use by another user."]];
+      }
     }
     
     foreach ($data as $field => $value) {

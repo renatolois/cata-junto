@@ -62,6 +62,12 @@ class InPersonCollectionValidator extends BaseValidator {
       }
     }
 
+    if (!$attributes['paid_value'] instanceof NeutralValue) {
+      if ((float) $attributes['paid_value'] < 0) {
+        $this->errors['paid_value'] = "The paid_value must be greater than or equal to 0.";
+      }
+    }
+
     if (!$attributes['quantity'] instanceof NeutralValue) {
       if ((float) $attributes['quantity'] <= 0) {
         $this->errors['quantity'] = "The quantity field must be greater than 0.";
@@ -138,6 +144,12 @@ class InPersonCollectionValidator extends BaseValidator {
     if (in_array('quantity', $fillables) && !$attributes['quantity'] instanceof NeutralValue) {
       if ((float) $attributes['quantity'] <= 0) {
         $this->errors['quantity'] = "The quantity field must be greater than 0.";
+      }
+    }
+
+    if (in_array('paid_value', $fillables) && !$attributes['paid_value'] instanceof NeutralValue) {
+      if ((float) $attributes['paid_value'] < 0) {
+        $this->errors['paid_value'] = "The paid_value must be greater than or equal to 0.";
       }
     }
 

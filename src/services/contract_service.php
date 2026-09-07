@@ -27,12 +27,6 @@ class ContractService extends BaseService {
     $this->role_repository = $role_repository;
   }
 
-  private function hydrate_and_validate(array $data): array {
-    $contract = $this->repository->hydrate($data);
-    $errors = $this->validator->validate($contract);
-    return [$contract, $errors];
-  }
-
   public function create(array $data): array|ContractModel {
     [$contract, $errors] = $this->hydrate_and_validate($data);
 

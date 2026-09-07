@@ -14,17 +14,18 @@ class RoleService extends BaseService {
     parent::__construct($repository, $validator);
   }
 
-  private function hydrate_and_validate(array $data): array {
-    $role = $this->repository->hydrate($data);
-    $errors = $this->validator->validate($role);
-    return [$role, $errors];
-  }
-
   public function create(array $data): array|RoleModel {
     [$role, $errors] = $this->hydrate_and_validate($data);
 
     if (!empty($errors)) {
       return ["errors" => $errors];
+    }
+
+    if (isset($data['name'])) {
+      $existing = $this->repository->find_by_name($data['name']);
+      if ($existing !== null) {
+        return ["errors" => ["name" => "Role name already exists."]];
+      }
     }
 
     $result = $this->repository->create_role($role->get_attributes());
@@ -39,6 +40,13 @@ class RoleService extends BaseService {
     $role = $this->repository->find_by_id($pk);
     if ($role === null) {
       return ["errors" => ["service_error" => "Role not found."]];
+    }
+
+    if (isset($data['name'])) {
+      $existing = $this->repository->find_by_name($data['name']);
+      if ($existing !== null && $existing->get_id() !== $pk) {
+        return ["errors" => ["name" => "Role name already in use by another role."]];
+      }
     }
 
     foreach ($data as $field => $value) {

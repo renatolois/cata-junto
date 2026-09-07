@@ -1,2 +1,10 @@
 ## adicionar verificacao de usuario na service
-verificar pq a senha do mysql nao ta indo
+## verificar pq a senha do mysql nao ta indo
+adicionar auth middleware
+adicionar constantes de erros de banco de dados de acordo com o que estiver usando
+adicionar try catch nos controllers
+
+adicionar regra de negocio para limitar quantia de solicitacoes de coleta, deixar assim até conseguir testar tudo no front
+
+implementar rollback no db
+cuidar da transação em prize_claim_service e em in_person_collection com rollback !!!!!!!!!!!!!!

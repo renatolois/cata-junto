@@ -42,6 +42,10 @@ class PersonModel extends BaseModel {
     return $this->id;
   }
 
+  public function set_id(string $id): void {
+    $this->id = $id;
+  }
+
   public function get_email(): string {
     return $this->email;
   }
@@ -74,6 +78,10 @@ class PersonModel extends BaseModel {
     return (bool) ($this->active ?? false);
   }
 
+  public function set_active(bool $active): void {
+    $this->active = $active;
+  }
+
   public function set_cpf(string $cpf): void {
     $this->cpf = $cpf;
   }
@@ -100,6 +108,14 @@ class PersonModel extends BaseModel {
 
   public function set_current_points(int $points): void {
     $this->current_points = $points;
+  }
+
+  public function get_password_hash(): string {
+    return $this->password_hash ?? '';
+  }
+
+  public function set_password_hash(string $password_hash): void {
+    $this->password_hash = $password_hash;
   }
 
   public function activate(): void {

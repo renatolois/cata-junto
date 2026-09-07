@@ -11,94 +11,30 @@ use \RuntimeException;
 use \Exception;
 
 class MysqlAdapter extends BaseAdapter {
-  private array $env_vars;
   private ?PDO $pdo = null;
 
   public function __construct() {
-    try {
-      $this->env_vars = $this->loadEnv();
-      Logger::set_log_level($this->env_vars['log_level'] ?? 'all');
-      
-      $dsn = sprintf(
-        "mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4",
-        $this->env_vars["db_host"],
-        $this->env_vars["db_port"],
-        $this->env_vars["db_name"]
-      );
-      
-      $this->pdo = new PDO(
-        $dsn,
-        $this->env_vars["db_user"] ?? 'root',
-        $this->env_vars["db_password"] ?? '',
-        [
-          PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-          PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-          PDO::ATTR_EMULATE_PREPARES => false
-        ]
-      );
-      
-      Logger::all("MySQLAdapter initialized", ['database' => $this->env_vars["db_name"]]);
-    } catch (PDOException $e) {
-      Logger::error("Error connecting to MySQL", ['error' => $e->getMessage()]);
-      throw new RuntimeException("Error connecting to MySQL: " . $e->getMessage());
-    } catch (Exception $e) {
-      Logger::error("Error initializing MySQLAdapter", ['error' => $e->getMessage()]);
-      throw new RuntimeException("Error initializing database: " . $e->getMessage());
-    }
-  }
-
-  private function loadEnv(): array {
-    $env_file = __DIR__ . '/../../.env';
-    $vars = [];
-
-    if (file_exists($env_file)) {
-      $lines = file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-      foreach ($lines as $line) {
-        if (str_starts_with($line, '#')) {
-          continue;
-        }
-        
-        $parts = explode('=', $line, 2);
-        if (count($parts) === 2) {
-          $key = trim($parts[0]);
-          $value = trim($parts[1]);
-          $value = trim($value, '"\'');
-          $vars[$key] = $value;
-          $_ENV[$key] = $value;
-        }
-      }
-    }
-
-    // Fallback values
-    return [
-      'supabase_url' => $vars['SUPABASE_URL'] ?? null,
-      'supabase_key' => $vars['SUPABASE_KEY'] ?? null,
-      'db_url'       => $vars['DB_URL'] ?? null,
-      'db_host'      => $vars['DB_HOST'] ?? 'localhost',
-      'db_port'      => $vars['DB_PORT'] ?? '3306',
-      'db_name'      => $vars['DB_NAME'] ?? 'cooperativa',
-      'db_key'       => $vars['DB_KEY'] ?? null,
-      'db_user'      => $vars['DB_USER'] ?? 'root',
-      'db_password'  => $vars['DB_PASSWORD'] ?? '',
-      'app_mode'     => $vars['APP_MODE'] ?? 'debug',
-      'app_env'      => $vars['APP_ENV'] ?? 'testing',
-      'log_level'    => $vars['LOG_LEVEL'] ?? 'all',
-    ];
+    $env = $this->load_env();
+    Logger::set_log_level($env['log_level'] ?? 'all');
+    Logger::all("MySQLAdapter initialized");
   }
 
   public function connect(array $config): void {
-    if ($config) {
-      $dsn = sprintf(
-        "mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4",
-        $config['host'] ?? $this->env_vars["db_host"] ?? 'localhost',
-        $config['port'] ?? $this->env_vars["db_port"] ?? '3306',
-        $config['database'] ?? $this->env_vars["db_name"] ?? 'cooperativa'
-      );
+    try {
+      $env = $this->load_env();
+      
+      $host = $config['host'] ?? $env['db_host'] ?? 'localhost';
+      $port = $config['port'] ?? $env['db_port'] ?? '3306';
+      $dbname = $config['dbname'] ?? $env['db_name'] ?? 'cooperativa';
+      $user = $config['user'] ?? $env['db_user'] ?? 'root';
+      $password = $config['password'] ?? $env['db_password'] ?? '';
+
+      $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
       
       $this->pdo = new PDO(
         $dsn,
-        $config['user'] ?? $this->env_vars["db_user"] ?? 'root',
-        $config['password'] ?? $this->env_vars["db_password"] ?? '',
+        $user,
+        $password,
         [
           PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
           PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -106,7 +42,10 @@ class MysqlAdapter extends BaseAdapter {
         ]
       );
       
-      Logger::info("MySQL connected via config", ['database' => $config['database'] ?? 'unknown']);
+      Logger::info("MySQL connected successfully", ['database' => $dbname, 'user' => $user]);
+    } catch (PDOException $e) {
+      Logger::error("Error connecting to MySQL", ['error' => $e->getMessage()]);
+      throw new RuntimeException("Error connecting to MySQL: " . $e->getMessage());
     }
   }
 
@@ -115,7 +54,7 @@ class MysqlAdapter extends BaseAdapter {
     Logger::all("MySQL disconnected");
   }
 
-  public function insert(string $table, array $data): array {
+public function insert(string $table, array $data): array {
     Logger::all("Insert into {$table}", $data);
     
     $columns = implode(', ', array_keys($data));
@@ -125,13 +64,18 @@ class MysqlAdapter extends BaseAdapter {
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute($data);
     
-    $id = (int) $this->pdo->lastInsertId();
+    Logger::info("Insert completed in {$table}");
+    
+    if (isset($data['id']) && !empty($data['id'])) {
+      $result = $this->select_by_id($table, $data['id']);
+      return $result ?? [];
+    }
+    
+    $id = $this->pdo->lastInsertId();
     $result = $this->select_by_id($table, $id);
-    
-    Logger::info("Insert completed in {$table}", ['id' => $id]);
-    
+
     return $result;
-  }
+}
 
   public function select(string $table, array $where = []): array {
     Logger::all("Select from {$table}", ['where' => $where]);
