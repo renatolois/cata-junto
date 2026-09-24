@@ -16,7 +16,7 @@ class MaterialTypeValidator extends BaseValidator {
     $this->errors = [];
 
     if (!$obj instanceof MaterialTypeModel) {
-      $this->errors[] = "The object must be an instance of RoleModel.";
+      $this->errors[] = "The object must be an instance of MaterialTypeModel.";
       return $this->errors;
     }
 

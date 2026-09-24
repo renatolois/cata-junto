@@ -11,13 +11,6 @@ class PrizeClaimController extends BaseController {
     parent::__construct($service);
   }
 
-  /*
-  GET /prize-claim
-  GET /prize-claim?status=<STATUS>
-  GET /prize-claim?location_id=<LOCATION_ID>
-  GET /prize-claim?prize_type_id=<PRIZE_TYPE_ID>
-  GET /prize-claim?id=<ID>
-  */
   public function list(): void {
     $status = $this->get_query('status');
     $location_id = $this->get_query('location_id');
@@ -31,50 +24,38 @@ class PrizeClaimController extends BaseController {
     }
 
     if ($id !== null) {
-      $claim = $this->service->find_by_id((int) $id);
-      $this->json_response($claim ? $claim->to_array() : []);
+      $result = $this->service->find_by_id((int) $id);
+      $this->handle_result($result);
       return;
     } else if ($status !== null) {
-      $claims = $this->service->find_by_status($status);
-      $this->json_response(array_map(fn($c) => $c->to_array(), $claims));
+      $result = $this->service->find_by_status($status);
+      $this->handle_result($result);
       return;
     } else if ($location_id !== null) {
-      $claims = $this->service->find_by_location($location_id);
-      $this->json_response(array_map(fn($c) => $c->to_array(), $claims));
+      $result = $this->service->find_by_location((int) $location_id);
+      $this->handle_result($result);
       return;
     } else if ($prize_type_id !== null) {
-      $claims = $this->service->find_by_prize_type((int) $prize_type_id);
-      $this->json_response(array_map(fn($c) => $c->to_array(), $claims));
+      $result = $this->service->find_by_prize_type((int) $prize_type_id);
+      $this->handle_result($result);
       return;
     }
 
-    $claims = $this->service->find_all();
-    $this->json_response(array_map(fn($c) => $c->to_array(), $claims));
+    $result = $this->service->find_all();
+    $this->handle_result($result);
   }
 
-  /*
-  POST /prize-claim
-  body: { "claimed_by": "<LOCATION_ID>", "prize_type_id": <PRIZE_TYPE_ID> }
-  */
   public function create(): void {
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not provided', 400);
       return;
     }
 
     $result = $this->service->create($data);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array(), 201);
+    $this->handle_result($result, 201);
   }
 
-  /*
-  PUT /prize-claim/{id}/complete
-  */
   public function complete(): void {
     $id = $this->get_route('id');
     if (!$id) {
@@ -83,17 +64,9 @@ class PrizeClaimController extends BaseController {
     }
 
     $result = $this->service->complete((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Prize claim completed successfully']);
+    $this->handle_result($result);
   }
 
-  /*
-  PUT /prize-claim/{id}/cancel
-  */
   public function cancel(): void {
     $id = $this->get_route('id');
     if (!$id) {
@@ -102,17 +75,9 @@ class PrizeClaimController extends BaseController {
     }
 
     $result = $this->service->cancel((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Prize claim cancelled successfully']);
+    $this->handle_result($result);
   }
 
-  /*
-  PUT /prize-claim/{id}/reject
-  */
   public function reject(): void {
     $id = $this->get_route('id');
     if (!$id) {
@@ -121,18 +86,10 @@ class PrizeClaimController extends BaseController {
     }
 
     $result = $this->service->reject((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Prize claim rejected successfully']);
+    $this->handle_result($result);
   }
 
-  /*
-  DELETE /prize-claim/{id}
-  */
-  public function delete(): void {
+  public function destroy(): void {
     $id = $this->get_route('id');
     if (!$id) {
       $this->error_response('ID not provided', 400);
@@ -140,11 +97,6 @@ class PrizeClaimController extends BaseController {
     }
 
     $result = $this->service->hard_delete((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Prize claim deleted successfully']);
+    $this->handle_result($result);
   }
 }

@@ -59,4 +59,85 @@ abstract class BaseController {
   protected function error_response(string $message, int $status_code = 400): void {
     $this->json_response(['error' => $message], $status_code);
   }
+
+  protected function is_error_result($result): bool {
+    return is_array($result) && isset($result['errors']);
+  }
+
+  protected function is_null_result($result): bool {
+    return $result === null;
+  }
+
+  protected function is_primitive_type_result($result): bool {
+    return is_scalar($result);
+  }
+
+  protected function is_model_result($result): bool {
+    return $result instanceof BaseModel;
+  }
+
+  protected function is_array_result($result): bool {
+    return is_array($result) && !isset($result['errors']);
+  }
+
+  protected function handle_error(array $errors): void {
+    if (isset($errors['not_found_error'])) {
+      $this->json_response(['errors' => $errors], 404);
+      return;
+    }
+
+    if (isset($errors['service_error'])) {
+      $this->json_response(['errors' => $errors], 500);
+      return;
+    }
+
+    if (isset($errors['server_error'])) {
+      $this->json_response(['errors' => $errors], 500);
+      return;
+    }
+
+    $this->json_response(['errors' => $errors], 422);
+  }
+
+  protected function handle_result($result, int $success_code = 200): void {
+    if ($this->is_error_result($result)) {
+      $this->handle_error($result['errors']);
+      return;
+    }
+
+    if ($this->is_null_result($result)) {
+      $this->json_response([
+        'errors' => ['not_found_error' => 'Resource not found']
+      ], 404);
+      return;
+    }
+    
+    if ($this->is_model_result($result)) {
+      $this->json_response($result->to_array(), $success_code);
+      return;
+    }
+
+    if ($this->is_primitive_type_result($result)) {
+      $this->json_response(['result' => $result]);
+      return;
+    }
+
+    if ($this->is_array_result($result)) {
+      $items = [];
+      foreach ($result as $item) {
+        if ($item instanceof BaseModel) {
+          $items[] = $item->to_array();
+        } else {
+          $this->json_response([
+            'errors' => ['server_error' => 'Unexpected type in array']
+          ], 500);
+          return;
+        }
+      }
+      $this->json_response($items, $success_code);
+      return;
+    }
+    
+    $this->json_response(['errors' => ['server_error' => 'Unexpected type']], 500);
+  }
 }

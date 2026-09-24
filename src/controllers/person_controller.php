@@ -15,7 +15,7 @@ class PersonController extends BaseController {
   GET /person?cpf=<CPF>
   GET /person?id=<ID>
   GET /person?email=<EMAIL>
-  GET /person?active=1
+  GET /person?active=1 (0 if active and inactive)
   */
   public function list(): void {
     $active = $this->get_query('active');
@@ -30,26 +30,26 @@ class PersonController extends BaseController {
     }
 
     if ($id !== null) {
-      $person = $this->service->find_by_id($id);
-      $this->json_response($person ? $person->to_array() : []);
+      $result = $this->service->find_by_id($id);
+      $this->handle_result($result);
       return;
     } else if ($email !== null) {
-      $person = $this->service->find_by_email($email);
-      $this->json_response($person ? $person->to_array() : []);
+      $result = $this->service->find_by_email($email);
+      $this->handle_result($result);
       return;
     } else if ($cpf !== null) {
-      $person = $this->service->find_by_cpf($cpf);
-      $this->json_response($person ? $person->to_array() : []);
+      $result = $this->service->find_by_cpf($cpf);
+      $this->handle_result($result);
       return;
     } else if ($active !== null) {
       $active = filter_var($active, FILTER_VALIDATE_BOOLEAN);
-      $people = $active ? $this->service->find_all_active() : $this->service->find_all();
-      $this->json_response(array_map(fn($p) => $p->to_array(), $people));
+      $result = $active ? $this->service->find_all_active() : $this->service->find_all();
+      $this->handle_result($result);
       return;
     }
 
-    $people = $this->service->find_all();
-    $this->json_response(array_map(fn($p) => $p->to_array(), $people));
+    $result = $this->service->find_all();
+    $this->handle_result($result);
   }
 
   /*
@@ -58,17 +58,12 @@ class PersonController extends BaseController {
   public function create(): void {
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not sent', 400);
       return;
     }
 
     $result = $this->service->create($data);
-    if (isset($result['errors'])) {
-      $this->json_response(['errors' => $result['errors']], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array(), 201);
+    $this->handle_result($result, 201);
   }
 
   /*
@@ -77,42 +72,18 @@ class PersonController extends BaseController {
   public function update(): void {
     $id = $this->get_route('id');
     if (!$id) {
-      $this->error_response('ID is null', 400);
+      $this->error_response('ID not provided', 400);
       return;
     }
 
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not provided', 400);
       return;
     }
 
     $result = $this->service->update($id, $data);
-    if (isset($result['errors'])) {
-      $this->json_response(['errors' => $result['errors']], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array());
-  }
-
-  /*
-  DELETE /person/{id}
-  */
-  public function destroy(): void {
-    $id = $this->get_route('id');
-    if (!$id) {
-      $this->error_response('ID not sended', 400);
-      return;
-    }
-
-    $result = $this->service->hard_delete($id);
-    if (isset($result['errors'])) {
-      $this->json_response(['errors' => $result['errors']], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Person deleted successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -121,17 +92,12 @@ class PersonController extends BaseController {
   public function activate(): void {
     $id = $this->get_route('id');
     if (!$id) {
-      $this->error_response('ID not sended', 400);
+      $this->error_response('ID not provided', 400);
       return;
     }
 
     $result = $this->service->activate($id);
-    if (isset($result['errors'])) {
-      $this->json_response(['errors' => $result['errors']], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Person activated successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -145,12 +111,7 @@ class PersonController extends BaseController {
     }
 
     $result = $this->service->deactivate($id);
-    if (isset($result['errors'])) {
-      $this->json_response(['errors' => $result['errors']], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Person deactivated successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -171,12 +132,7 @@ class PersonController extends BaseController {
     }
 
     $result = $this->service->add_points($id, (int)$data['points']);
-    if (isset($result['errors'])) {
-      $this->json_response(['errors' => $result['errors']], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Points added successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -197,12 +153,7 @@ class PersonController extends BaseController {
     }
 
     $result = $this->service->deduct_points($id, (int)$data['points']);
-    if (isset($result['errors'])) {
-      $this->json_response(['errors' => $result['errors']], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Points deducted successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -223,11 +174,6 @@ class PersonController extends BaseController {
     }
 
     $result = $this->service->verify_password($id, $data['password']);
-    if (isset($result['errors'])) {
-      $this->json_response(['errors' => $result['errors']], 400);
-      return;
-    }
-
-    $this->json_response(['valid' => $result]);
+    $this->handle_result($result);
   }
 }

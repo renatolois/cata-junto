@@ -8,3 +8,7 @@ adicionar regra de negocio para limitar quantia de solicitacoes de coleta, deixa
 
 implementar rollback no db
 cuidar da transação em prize_claim_service e em in_person_collection com rollback !!!!!!!!!!!!!!
+
+mexer em base router para proteger vulnerabilidades na url
+
+materialtyperepo -> find all active -> trocar AND por OR.

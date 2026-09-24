@@ -11,12 +11,6 @@ class PrizeTypeController extends BaseController {
     parent::__construct($service);
   }
 
-  /*
-  GET /prize-type
-  GET /prize-type?active=1
-  GET /prize-type?name=<NAME>
-  GET /prize-type?id=<ID>
-  */
   public function list(): void {
     $active = $this->get_query('active');
     $name = $this->get_query('name');
@@ -29,46 +23,35 @@ class PrizeTypeController extends BaseController {
     }
 
     if ($id !== null) {
-      $prize_type = $this->service->find_by_id((int) $id);
-      $this->json_response($prize_type ? $prize_type->to_array() : []);
+      $result = $this->service->find_by_id((int) $id);
+      $this->handle_result($result);
       return;
     } else if ($name !== null) {
-      $prize_type = $this->service->find_by_name($name);
-      $this->json_response($prize_type ? $prize_type->to_array() : []);
+      $result = $this->service->find_by_name($name);
+      $this->handle_result($result);
       return;
     } else if ($active !== null) {
       $active = filter_var($active, FILTER_VALIDATE_BOOLEAN);
-      $prize_types = $active ? $this->service->find_all_active() : $this->service->find_all();
-      $this->json_response(array_map(fn($p) => $p->to_array(), $prize_types));
+      $result = $active ? $this->service->find_all_active() : $this->service->find_all();
+      $this->handle_result($result);
       return;
     }
 
-    $prize_types = $this->service->find_all();
-    $this->json_response(array_map(fn($p) => $p->to_array(), $prize_types));
+    $result = $this->service->find_all();
+    $this->handle_result($result);
   }
 
-  /*
-  POST /prize-type
-  */
   public function create(): void {
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not provided', 400);
       return;
     }
 
     $result = $this->service->create($data);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array(), 201);
+    $this->handle_result($result, 201);
   }
 
-  /*
-  PUT /prize-type/{id}
-  */
   public function update(): void {
     $id = $this->get_route('id');
     if (!$id) {
@@ -78,23 +61,15 @@ class PrizeTypeController extends BaseController {
 
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not provided', 400);
       return;
     }
 
     $result = $this->service->update((int) $id, $data);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array());
+    $this->handle_result($result);
   }
 
-  /*
-  DELETE /prize-type/{id}
-  */
-  public function delete(): void {
+  public function destroy(): void {
     $id = $this->get_route('id');
     if (!$id) {
       $this->error_response('ID not provided', 400);
@@ -102,17 +77,9 @@ class PrizeTypeController extends BaseController {
     }
 
     $result = $this->service->hard_delete((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Prize type deleted successfully']);
+    $this->handle_result($result);
   }
 
-  /*
-  PUT /prize-type/{id}/activate
-  */
   public function activate(): void {
     $id = $this->get_route('id');
     if (!$id) {
@@ -121,17 +88,9 @@ class PrizeTypeController extends BaseController {
     }
 
     $result = $this->service->activate((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Prize type activated successfully']);
+    $this->handle_result($result);
   }
 
-  /*
-  PUT /prize-type/{id}/deactivate
-  */
   public function deactivate(): void {
     $id = $this->get_route('id');
     if (!$id) {
@@ -140,11 +99,6 @@ class PrizeTypeController extends BaseController {
     }
 
     $result = $this->service->deactivate((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Prize type deactivated successfully']);
+    $this->handle_result($result);
   }
 }

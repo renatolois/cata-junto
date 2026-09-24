@@ -33,9 +33,9 @@ class MaterialTypeModel extends BaseModel {
 
   public function get_id(): int {
     return (int) $this->id;
-  }
-
+    
   public function get_name(): string {
+    }
     return $this->name;
   }
 
@@ -61,6 +61,10 @@ class MaterialTypeModel extends BaseModel {
 
   public function is_unit_active(): bool {
     return (bool) ($this->unit_active ?? false);
+  }
+
+  public function set_id(int $id): void {
+    $this->id = $id;
   }
 
   public function set_name(string $name): void {

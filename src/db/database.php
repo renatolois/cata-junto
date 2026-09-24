@@ -5,7 +5,11 @@ namespace Db;
 
 use Core\Utils\AppConstants;
 use Core\Base\BaseAdapter;
+use Db\Adapters\MysqlAdapter;
+use Db\Adapters\PostgresqlAdapter;
+use Db\Adapters\SupabaseAdapter;
 use \RuntimeException;
+
 
 class Database {
   private const DB_TYPE = AppConstants::DB_TYPE;
@@ -14,16 +18,13 @@ class Database {
   public function __construct() {
     switch(self::DB_TYPE) {
       case 'mysql':
-        require_once __DIR__ . '/adapters/mysql_adapter.php';
-        $this->adapter = new \Db\Adapters\MysqlAdapter();
+        $this->adapter = new MysqlAdapter();
         break;
       case 'postgresql':
-        require_once __DIR__ . '/adapters/postgresql_adapter.php';
-        $this->adapter = new \Db\Adapters\PostgresqlAdapter();
+        $this->adapter = new PostgresqlAdapter();
         break;
       case 'supabase':
-        require_once __DIR__ . '/adapters/supabase_adapter.php';
-        $this->adapter = new \Db\Adapters\SupabaseAdapter();
+        $this->adapter = new SupabaseAdapter();
         break;
       default:
         throw new RuntimeException("Unrecognized database type: {$DB_TYPE}");

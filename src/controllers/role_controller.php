@@ -29,22 +29,24 @@ class RoleController extends BaseController {
     }
 
     if ($id !== null) {
-      $role = $this->service->find_by_id((int) $id);
-      $this->json_response($role ? $role->to_array() : []);
+      $result = $this->service->find_by_id((int) $id);
+      $this->handle_result($result);
       return;
     } else if ($name !== null) {
-      $role = $this->service->find_by_name($name);
-      $this->json_response($role ? $role->to_array() : []);
+      $result = $this->service->find_by_name($name);
+      $this->handle_result($result);
       return;
     } else if ($active !== null) {
       $active = filter_var($active, FILTER_VALIDATE_BOOLEAN);
-      $roles = $active ? $this->service->find_all_active() : $this->service->find_all();
-      $this->json_response(array_map(fn($r) => $r->to_array(), $roles));
+      $result = $active
+        ? $this->service->find_all_active()
+        : $this->service->find_all();
+      $this->handle_result($result);
       return;
     }
 
-    $roles = $this->service->find_all();
-    $this->json_response(array_map(fn($r) => $r->to_array(), $roles));
+    $result = $this->service->find_all();
+    $this->handle_result($result);
   }
 
   /*
@@ -53,17 +55,12 @@ class RoleController extends BaseController {
   public function create(): void {
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not sent', 400);
       return;
     }
 
     $result = $this->service->create($data);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array(), 201);
+    $this->handle_result($result, 201);
   }
 
   /*
@@ -78,36 +75,12 @@ class RoleController extends BaseController {
 
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not sent', 400);
       return;
     }
 
     $result = $this->service->update((int) $id, $data);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array());
-  }
-
-  /*
-  DELETE /role/{id}
-  */
-  public function delete(): void {
-    $id = $this->get_route('id');
-    if (!$id) {
-      $this->error_response('ID not provided', 400);
-      return;
-    }
-
-    $result = $this->service->hard_delete((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Role deleted successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -121,12 +94,7 @@ class RoleController extends BaseController {
     }
 
     $result = $this->service->activate((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Role activated successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -140,11 +108,6 @@ class RoleController extends BaseController {
     }
 
     $result = $this->service->deactivate((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Role deactivated successfully']);
+    $this->handle_result($result);
   }
 }

@@ -15,7 +15,7 @@ class MaterialTypeService extends BaseService {
   }
 
   public function create(array $data): array|MaterialTypeModel {
-    [$materialType, $errors] = $this->hydrate_and_validate($data);
+    [$materialType, $errors] = $this->hydrate_and_validate_fillables($data);
 
     if (!empty($errors)) {
       return ["errors" => $errors];

@@ -7,6 +7,9 @@ use Core\Base\BaseService;
 use App\Models\RoleModel;
 use App\Validators\RoleValidator;
 use App\Repositories\RoleRepository;
+use Core\Utils\AppConstants;
+use Core\Utils\Logger;
+use Exception;
 
 class RoleService extends BaseService {
 
@@ -15,113 +18,205 @@ class RoleService extends BaseService {
   }
 
   public function create(array $data): array|RoleModel {
-    [$role, $errors] = $this->hydrate_and_validate($data);
-
-    if (!empty($errors)) {
-      return ["errors" => $errors];
-    }
-
-    if (isset($data['name'])) {
-      $existing = $this->repository->find_by_name($data['name']);
-      if ($existing !== null) {
-        return ["errors" => ["name" => "Role name already exists."]];
+    try {
+      if (isset($data['name'])) {
+        $existing = $this->repository->find_by_name($data['name']);
+        if ($existing !== null) {
+          return ["errors" => ["name" => "Role name already exists."]];
+        }
       }
-    }
 
-    $result = $this->repository->create_role($role->get_attributes());
-    if ($result === null) {
-      return ["errors" => ["service_error" => "Failed to create role."]];
-    }
+      [$role, $errors] = $this->hydrate_and_validate_fillables($data);
 
-    return $result;
+      if (!empty($errors)) {
+        return ["errors" => $errors];
+      }
+
+      $result = $this->repository->create_role($role->get_attributes());
+      if ($result === null) {
+        return ["errors" => ["service_error" => "Failed to create role."]];
+      }
+
+      return $result;
+    } catch (Exception $e) {
+      Logger::error('Error creating role', ['error' => $e->getMessage()]);
+      return [
+        'errors' => [
+          'server_error' =>
+            AppConstants::RUN_MODE === 'debug'
+              ? $e->getMessage()
+              : 'unexpected_error',
+        ],
+      ];
+    }
   }
 
   public function update(string|int $pk, array $data): array|RoleModel {
-    $role = $this->repository->find_by_id($pk);
-    if ($role === null) {
-      return ["errors" => ["service_error" => "Role not found."]];
-    }
-
-    if (isset($data['name'])) {
-      $existing = $this->repository->find_by_name($data['name']);
-      if ($existing !== null && $existing->get_id() !== $pk) {
-        return ["errors" => ["name" => "Role name already in use by another role."]];
+    try {
+      $role = $this->repository->find_by_id($pk);
+      if ($role === null) {
+        return ["errors" => ["not_found_error" => "Role not found."]];
       }
-    }
 
-    foreach ($data as $field => $value) {
-      if (property_exists($role, $field)) {
+      foreach ($data as $field => $value) {
+        if (!in_array($field, $role->get_fillables(), true)) {
+          return ['errors' => [$field => 'Not fillable attribute received to update.']];
+        }
+      }
+
+      if (isset($data['name'])) {
+        $existing = $this->repository->find_by_name($data['name']);
+        if ($existing !== null && (int) $existing->get_id() !== (int) $pk) {
+          return ["errors" => ["name" => "Role name already in use by another role."]];
+        }
+      }
+
+      foreach ($data as $field => $value) {
         $setter = 'set_' . $field;
         if (method_exists($role, $setter)) {
           $role->$setter($value);
         }
       }
-    }
 
-    $errors = $this->validator->validate($role);
-    if (!empty($errors)) {
-      return ["errors" => $errors];
-    }
+      $errors = $this->validator->validate_fillables($role);
+      if (!empty($errors)) {
+        return ["errors" => $errors];
+      }
 
-    $result = $this->repository->update_role($pk, $role->get_attributes());
-    if ($result === null) {
-      return ["errors" => ["service_error" => "Failed to update role."]];
-    }
+      $result = $this->repository->update_role($pk, $role->get_attributes());
+      if ($result === null) {
+        return ["errors" => ["service_error" => "Failed to update role."]];
+      }
 
-    return $result;
+      return $result;
+    } catch (Exception $e) {
+      Logger::error('Error updating role', ['pk' => $pk, 'error' => $e->getMessage()]);
+      return [
+        'errors' => [
+          'server_error' =>
+            AppConstants::RUN_MODE === 'debug'
+              ? $e->getMessage()
+              : 'unexpected_error',
+        ],
+      ];
+    }
   }
 
-  public function hard_delete(int $pk): bool|array {
-    $role = $this->repository->find_by_id($pk);
-    if ($role === null) {
-      return ["errors" => ["service_error" => "Role not found."]];
+  public function find_by_id(int $id): ?RoleModel|array {
+    try {
+      return $this->repository->find_by_id($id);
+    } catch (Exception $e) {
+      Logger::error('Error finding role by ID', ['id' => $id, 'error' => $e->getMessage()]);
+      return [
+        'errors' => [
+          'server_error' =>
+            AppConstants::RUN_MODE === 'debug'
+              ? $e->getMessage()
+              : 'unexpected_error',
+        ],
+      ];
     }
-    return $this->repository->delete($pk);
   }
 
-  public function find_by_id(int $id): ?RoleModel {
-    return $this->repository->find_by_id($id);
-  }
-
-  public function find_by_name(string $name): ?RoleModel {
-    return $this->repository->find_by_name($name);
+  public function find_by_name(string $name): ?RoleModel|array {
+    try {
+      return $this->repository->find_by_name($name);
+    } catch (Exception $e) {
+      Logger::error('Error finding role by name', ['name' => $name, 'error' => $e->getMessage()]);
+      return [
+        'errors' => [
+          'server_error' =>
+            AppConstants::RUN_MODE === 'debug'
+              ? $e->getMessage()
+              : 'unexpected_error',
+        ],
+      ];
+    }
   }
 
   public function find_all_active(): array {
-    return $this->repository->find_all_active();
+    try {
+      return $this->repository->find_all_active();
+    } catch (Exception $e) {
+      Logger::error('Error finding active roles', ['error' => $e->getMessage()]);
+      return [
+        'errors' => [
+          'server_error' =>
+            AppConstants::RUN_MODE === 'debug'
+              ? $e->getMessage()
+              : 'unexpected_error',
+        ],
+      ];
+    }
   }
 
   public function find_all(): array {
-    return $this->repository->find_all();
+    try {
+      return $this->repository->find_all();
+    } catch (Exception $e) {
+      Logger::error('Error finding all roles', ['error' => $e->getMessage()]);
+      return [
+        'errors' => [
+          'server_error' =>
+            AppConstants::RUN_MODE === 'debug'
+              ? $e->getMessage()
+              : 'unexpected_error',
+        ],
+      ];
+    }
   }
 
   public function activate(int $pk): bool|array {
-    $role = $this->repository->find_by_id($pk);
-    if ($role === null) {
-      return ["errors" => ["service_error" => "Role not found."]];
-    }
+    try {
+      $role = $this->repository->find_by_id($pk);
+      if ($role === null) {
+        return ["errors" => ["not_found_error" => "Role not found."]];
+      }
 
-    $role->activate();
-    $result = $this->repository->update_role($pk, ['active' => $role->is_active()]);
-    if ($result === null) {
-      return ["errors" => ["service_error" => "Failed to activate role."]];
-    }
+      $role->activate();
+      $result = $this->repository->update_role($pk, ['active' => $role->is_active()]);
+      if ($result === null) {
+        return ["errors" => ["service_error" => "Failed to activate role."]];
+      }
 
-    return $result;
+      return $result;
+    } catch (Exception $e) {
+      Logger::error('Error activating role', ['pk' => $pk, 'error' => $e->getMessage()]);
+      return [
+        'errors' => [
+          'server_error' =>
+            AppConstants::RUN_MODE === 'debug'
+              ? $e->getMessage()
+              : 'unexpected_error',
+        ],
+      ];
+    }
   }
 
   public function deactivate(int $pk): bool|array {
-    $role = $this->repository->find_by_id($pk);
-    if ($role === null) {
-      return ["errors" => ["service_error" => "Role not found."]];
-    }
+    try {
+      $role = $this->repository->find_by_id($pk);
+      if ($role === null) {
+        return ["errors" => ["not_found_error" => "Role not found."]];
+      }
 
-    $role->deactivate();
-    $result = $this->repository->update_role($pk, ['active' => $role->is_active()]);
-    if ($result === null) {
-      return ["errors" => ["service_error" => "Failed to deactivate role."]];
-    }
+      $role->deactivate();
+      $result = $this->repository->update_role($pk, ['active' => $role->is_active()]);
+      if ($result === null) {
+        return ["errors" => ["service_error" => "Failed to deactivate role."]];
+      }
 
-    return $result;
+      return $result;
+    } catch (Exception $e) {
+      Logger::error('Error deactivating role', ['pk' => $pk, 'error' => $e->getMessage()]);
+      return [
+        'errors' => [
+          'server_error' =>
+            AppConstants::RUN_MODE === 'debug'
+              ? $e->getMessage()
+              : 'unexpected_error',
+        ],
+      ];
+    }
   }
 }

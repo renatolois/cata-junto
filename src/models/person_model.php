@@ -22,7 +22,7 @@ class PersonModel extends BaseModel {
       ],
   
       fillables: [
-        'email', 'phone_number', 'cpf', 'name', 'birth_date', 'current_points', 'active'
+        'email', 'phone_number', 'cpf', 'name', 'birth_date', 'current_points', 'active'  // Password can be here, but it's represented as password_hash. It cannot be here.
       ],
       hiddens: [
         'password_hash'
