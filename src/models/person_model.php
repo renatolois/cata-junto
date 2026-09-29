@@ -22,7 +22,7 @@ class PersonModel extends BaseModel {
       ],
   
       fillables: [
-        'email', 'phone_number', 'cpf', 'name', 'birth_date', 'current_points', 'active'  // Password can be here, but it's represented as password_hash. It cannot be here.
+        'email', 'phone_number', 'cpf', 'name', 'birth_date'  // Password can be here, but it's represented as password_hash. It cannot be here. current points for legacy code
       ],
       hiddens: [
         'password_hash'
@@ -40,10 +40,6 @@ class PersonModel extends BaseModel {
 
   public function get_id(): string {
     return $this->id;
-  }
-
-  public function set_id(string $id): void {
-    $this->id = $id;
   }
 
   public function get_email(): string {
@@ -76,6 +72,10 @@ class PersonModel extends BaseModel {
 
   public function is_active(): bool {
     return (bool) ($this->active ?? false);
+  }
+
+  public function set_id(string $id): void {
+    $this->id = $id;
   }
 
   public function set_active(bool $active): void {

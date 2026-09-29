@@ -17,7 +17,21 @@ class InPersonCollectionRepository extends BaseRepository {
   }
 
   public function find_by_collected_by(string $collected_by): array {
-    $result = $this->db->select($this->table, ['collected_by' => $collected_by]);
+    $result = $this->db->select_where(
+        $this->table,
+        ['collected_by' => $collected_by]
+    );
+    return array_map([$this, 'hydrate'], $result);
+  }
+
+  public function find_active_by_collected_by(string $collected_by): array {
+    $result = $this->db->select_where(
+        $this->table,
+        [
+            'collected_by' => $collected_by,
+            'active'       => 1
+        ]
+    );
     return array_map([$this, 'hydrate'], $result);
   }
 
@@ -42,7 +56,7 @@ class InPersonCollectionRepository extends BaseRepository {
   }
 
   public function create_in_person_collection(array $data): InPersonCollectionModel {
-    if (!isset($data['id'])) {
+    if (empty($data['id'])) {
       $data['id'] = $this->generate_uuid();
     }
 
@@ -64,15 +78,20 @@ class InPersonCollectionRepository extends BaseRepository {
   public function hydrate(array $data): InPersonCollectionModel {
     $collection = new InPersonCollectionModel();
 
-    $collection->set_id($data['id'] ?? null);
+    $collection->id = $data['id'] ?? null;
+
     $collection->set_collected_by($data['collected_by'] ?? NeutralValue::instance());
-    $collection->set_material_type_id((int) ($data['material_type_id'] ?? 0));
     $collection->set_collected_at($data['collected_at'] ?? NeutralValue::instance());
-    $collection->set_collect_type($data['collect_type'] ?? NeutralValue::instance());
-    $collection->set_quantity((float) ($data['quantity'] ?? 0));
     $collection->set_observation($data['observation'] ?? NeutralValue::instance());
-    $collection->set_active((bool) ($data['active'] ?? true));
+
+    if (isset($data['collect_type'])) {
+      $collection->set_collect_type($data['collect_type']);
+    }
+
+    $collection->set_material_type_id((int) ($data['material_type_id'] ?? 0));
+    $collection->set_quantity((float) ($data['quantity'] ?? 0));
     $collection->set_paid_value((float) ($data['paid_value'] ?? 0.0));
+    $collection->set_active((bool) ($data['active'] ?? true));
 
     return $collection;
   }
@@ -101,7 +120,7 @@ class InPersonCollectionRepository extends BaseRepository {
     }
 
     if (isset($data['quantity'])) {
-      $mapped['quantity'] = $data['quantity'];
+      $mapped['quantity'] = $data['quantity'] instanceof NeutralValue ? null : $data['quantity'];
     }
 
     if (isset($data['observation'])) {
@@ -109,7 +128,7 @@ class InPersonCollectionRepository extends BaseRepository {
     }
 
     if (isset($data['active'])) {
-      $mapped['active'] = (int) $data['active'];
+      $mapped['active'] = (int) (bool) $data['active'];
     }
 
     if (isset($data['paid_value'])) {

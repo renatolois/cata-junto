@@ -21,7 +21,7 @@ class InPersonCollectionValidator extends BaseValidator {
     $this->errors = [];
 
     if (!$obj instanceof InPersonCollectionModel) {
-      $this->errors[] = "The object must be an instance of RoleModel.";
+      $this->errors[] = "The object must be an instance of InPersonCollectionModel.";
       return $this->errors;
     }
 
@@ -82,11 +82,14 @@ class InPersonCollectionValidator extends BaseValidator {
     }
 
     if (!$attributes['collected_at'] instanceof NeutralValue) {
-      $year = (int) date('Y', strtotime((string) $attributes['collected_at']));
-      $max_allowed_year = (int) date('Y') + 1;
-      
-      if ($year <= 1900 || $year > $max_allowed_year) {
-        $this->errors['collected_at'] = "The collected_at field must be between the year 1900 and {$max_allowed_year}.";
+      $collected_at_str = (string) $attributes['collected_at'];
+      if (ValidatorUtils::datetime($collected_at_str)) {
+        $year = (int) date('Y', strtotime($collected_at_str));
+        $max_allowed_year = (int) date('Y') + 1;
+        
+        if ($year <= 1900 || $year > $max_allowed_year) {
+          $this->errors['collected_at'] = "The collected_at field must be between the year 1900 and {$max_allowed_year}.";
+        }
       }
     }
 
@@ -161,11 +164,14 @@ class InPersonCollectionValidator extends BaseValidator {
     }
 
     if (in_array('collected_at', $fillables) && !$attributes['collected_at'] instanceof NeutralValue) {
-      $year = (int) date('Y', strtotime((string) $attributes['collected_at']));
-      $max_allowed_year = (int) date('Y') + 1;
-      
-      if ($year <= 1900 || $year > $max_allowed_year) {
-        $this->errors['collected_at'] = "The collected_at field must be between the year 1900 and {$max_allowed_year}.";
+      $collected_at_str = (string) $attributes['collected_at'];
+      if (ValidatorUtils::datetime($collected_at_str)) {
+        $year = (int) date('Y', strtotime($collected_at_str));
+        $max_allowed_year = (int) date('Y') + 1;
+        
+        if ($year <= 1900 || $year > $max_allowed_year) {
+          $this->errors['collected_at'] = "The collected_at field must be between the year 1900 and {$max_allowed_year}.";
+        }
       }
     }
 

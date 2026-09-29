@@ -12,18 +12,18 @@ class ResidentialCollectionValidator extends BaseValidator {
   
   private const COLLECT_TYPES = ['weight', 'unit'];
   private const MAX_TEXT_LENGTH = 500;
-  private const ALLOWED_STATUSES = ['pending', 'completed', 'cancelled', 'rejected', 'inactive'];
+  private const ALLOWED_STATUSES = ['pending', 'completed', 'cancelled', 'rejected'];
   
   private array $optional_fields = [
-    'collected_by', 'collected_at', 'observation', 
-    'description', 'deactivation_at', 'deactivation_justification'
+    'collected_by', 'collected_at', 'quantity', 'observation',
+    'description', 'deactivation_at', 'deactivation_justification', 'rejected_by'
   ];
   
   public function validate($obj): array {
     $this->errors = [];
 
-    if (!$obj instanceof ResidentailCollectionModel) {
-      $this->errors[] = "The object must be an instance of RoleModel.";
+    if (!$obj instanceof ResidentialCollectionModel) {
+      $this->errors[] = "The object must be an instance of ResidentialCollectionModel.";
       return $this->errors;
     }
 
@@ -65,8 +65,14 @@ class ResidentialCollectionValidator extends BaseValidator {
     }
 
     if (!$attributes['quantity'] instanceof NeutralValue) {
-      if ((float) $attributes['quantity'] < 0) {
-        $this->errors['quantity'] = "The quantity field must be greater than or equal to 0.";
+      if ((float) $attributes['quantity'] <= 0) {
+        $this->errors['quantity'] = "The quantity field must be greater than 0.";
+      }
+    }
+
+    if (!$attributes['conceded_points'] instanceof NeutralValue) {
+      if ((int) $attributes['conceded_points'] < 0) {
+        $this->errors['conceded_points'] = "The conceded_points field must be greater than or equal to 0.";
       }
     }
 
@@ -93,29 +99,38 @@ class ResidentialCollectionValidator extends BaseValidator {
     }
 
     if (!$attributes['collected_at'] instanceof NeutralValue) {
-      $year = (int) date('Y', strtotime((string) $attributes['collected_at']));
-      $max_allowed_year = (int) date('Y') + 1;
-      
-      if ($year <= 1900 || $year > $max_allowed_year) {
-        $this->errors['collected_at'] = "The collected_at field must be between the year 1900 and {$max_allowed_year}.";
+      $collected_at_str = (string) $attributes['collected_at'];
+      if (ValidatorUtils::datetime($collected_at_str)) {
+        $year = (int) date('Y', strtotime($collected_at_str));
+        $max_allowed_year = (int) date('Y') + 1;
+        
+        if ($year <= 1900 || $year > $max_allowed_year) {
+          $this->errors['collected_at'] = "The collected_at field must be between the year 1900 and {$max_allowed_year}.";
+        }
       }
     }
 
     if (!$attributes['requested_at'] instanceof NeutralValue) {
-      $year = (int) date('Y', strtotime((string) $attributes['requested_at']));
-      $max_allowed_year = (int) date('Y') + 1;
-      
-      if ($year <= 1900 || $year > $max_allowed_year) {
-        $this->errors['requested_at'] = "The requested_at field must be between the year 1900 and {$max_allowed_year}.";
+      $requested_at_str = (string) $attributes['requested_at'];
+      if (ValidatorUtils::datetime($requested_at_str)) {
+        $year = (int) date('Y', strtotime($requested_at_str));
+        $max_allowed_year = (int) date('Y') + 1;
+        
+        if ($year <= 1900 || $year > $max_allowed_year) {
+          $this->errors['requested_at'] = "The requested_at field must be between the year 1900 and {$max_allowed_year}.";
+        }
       }
     }
 
     if (!$attributes['deactivation_at'] instanceof NeutralValue) {
-      $year = (int) date('Y', strtotime((string) $attributes['deactivation_at']));
-      $max_allowed_year = (int) date('Y') + 1;
-      
-      if ($year <= 1900 || $year > $max_allowed_year) {
-        $this->errors['deactivation_at'] = "The deactivation_at field must be between the year 1900 and {$max_allowed_year}.";
+      $deactivation_at_str = (string) $attributes['deactivation_at'];
+      if (ValidatorUtils::datetime($deactivation_at_str)) {
+        $year = (int) date('Y', strtotime($deactivation_at_str));
+        $max_allowed_year = (int) date('Y') + 1;
+        
+        if ($year <= 1900 || $year > $max_allowed_year) {
+          $this->errors['deactivation_at'] = "The deactivation_at field must be between the year 1900 and {$max_allowed_year}.";
+        }
       }
     }
 
@@ -178,8 +193,14 @@ class ResidentialCollectionValidator extends BaseValidator {
     }
 
     if (in_array('quantity', $fillables) && !$attributes['quantity'] instanceof NeutralValue) {
-      if ((float) $attributes['quantity'] < 0) {
-        $this->errors['quantity'] = "The quantity field must be greater than or equal to 0.";
+      if ((float) $attributes['quantity'] <= 0) {
+        $this->errors['quantity'] = "The quantity field must be greater than 0.";
+      }
+    }
+
+    if (in_array('conceded_points', $fillables) && !$attributes['conceded_points'] instanceof NeutralValue) {
+      if ((int) $attributes['conceded_points'] < 0) {
+        $this->errors['conceded_points'] = "The conceded_points field must be greater than or equal to 0.";
       }
     }
 
@@ -206,29 +227,38 @@ class ResidentialCollectionValidator extends BaseValidator {
     }
 
     if (in_array('collected_at', $fillables) && !$attributes['collected_at'] instanceof NeutralValue) {
-      $year = (int) date('Y', strtotime((string) $attributes['collected_at']));
-      $max_allowed_year = (int) date('Y') + 1;
-      
-      if ($year <= 1900 || $year > $max_allowed_year) {
-        $this->errors['collected_at'] = "The collected_at field must be between the year 1900 and {$max_allowed_year}.";
+      $collected_at_str = (string) $attributes['collected_at'];
+      if (ValidatorUtils::datetime($collected_at_str)) {
+        $year = (int) date('Y', strtotime($collected_at_str));
+        $max_allowed_year = (int) date('Y') + 1;
+        
+        if ($year <= 1900 || $year > $max_allowed_year) {
+          $this->errors['collected_at'] = "The collected_at field must be between the year 1900 and {$max_allowed_year}.";
+        }
       }
     }
 
     if (in_array('requested_at', $fillables) && !$attributes['requested_at'] instanceof NeutralValue) {
-      $year = (int) date('Y', strtotime((string) $attributes['requested_at']));
-      $max_allowed_year = (int) date('Y') + 1;
-      
-      if ($year <= 1900 || $year > $max_allowed_year) {
-        $this->errors['requested_at'] = "The requested_at field must be between the year 1900 and {$max_allowed_year}.";
+      $requested_at_str = (string) $attributes['requested_at'];
+      if (ValidatorUtils::datetime($requested_at_str)) {
+        $year = (int) date('Y', strtotime($requested_at_str));
+        $max_allowed_year = (int) date('Y') + 1;
+        
+        if ($year <= 1900 || $year > $max_allowed_year) {
+          $this->errors['requested_at'] = "The requested_at field must be between the year 1900 and {$max_allowed_year}.";
+        }
       }
     }
 
     if (in_array('deactivation_at', $fillables) && !$attributes['deactivation_at'] instanceof NeutralValue) {
-      $year = (int) date('Y', strtotime((string) $attributes['deactivation_at']));
-      $max_allowed_year = (int) date('Y') + 1;
-      
-      if ($year <= 1900 || $year > $max_allowed_year) {
-        $this->errors['deactivation_at'] = "The deactivation_at field must be between the year 1900 and {$max_allowed_year}.";
+      $deactivation_at_str = (string) $attributes['deactivation_at'];
+      if (ValidatorUtils::datetime($deactivation_at_str)) {
+        $year = (int) date('Y', strtotime($deactivation_at_str));
+        $max_allowed_year = (int) date('Y') + 1;
+        
+        if ($year <= 1900 || $year > $max_allowed_year) {
+          $this->errors['deactivation_at'] = "The deactivation_at field must be between the year 1900 and {$max_allowed_year}.";
+        }
       }
     }
 

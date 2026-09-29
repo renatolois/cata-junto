@@ -4,5 +4,5 @@ namespace Core\Utils;
 
 class AppConstants {
 	public const DB_TYPE = "mysql";
-	public const RUN_MODE = "debug"
+	public const RUN_MODE = "debug";
 }

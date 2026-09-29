@@ -32,7 +32,7 @@ class PrizeClaimController extends BaseController {
       $this->handle_result($result);
       return;
     } else if ($location_id !== null) {
-      $result = $this->service->find_by_location((int) $location_id);
+      $result = $this->service->find_by_location($location_id);
       $this->handle_result($result);
       return;
     } else if ($prize_type_id !== null) {
@@ -86,17 +86,6 @@ class PrizeClaimController extends BaseController {
     }
 
     $result = $this->service->reject((int) $id);
-    $this->handle_result($result);
-  }
-
-  public function destroy(): void {
-    $id = $this->get_route('id');
-    if (!$id) {
-      $this->error_response('ID not provided', 400);
-      return;
-    }
-
-    $result = $this->service->hard_delete((int) $id);
     $this->handle_result($result);
   }
 }

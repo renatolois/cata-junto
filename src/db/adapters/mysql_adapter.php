@@ -54,7 +54,7 @@ class MysqlAdapter extends BaseAdapter {
     Logger::all("MySQL disconnected");
   }
 
-public function insert(string $table, array $data): array {
+  public function insert(string $table, array $data): array {
     Logger::all("Insert into {$table}", $data);
     
     $columns = implode(', ', array_keys($data));
@@ -75,9 +75,9 @@ public function insert(string $table, array $data): array {
     $result = $this->select_by_id($table, $id);
 
     return $result;
-}
+  }
 
-  public function select(string $table, array $where = []): array {
+  public function select(string $table, array $where = [], bool $use_or = false): array {
     Logger::all("Select from {$table}", ['where' => $where]);
     
     $sql = "SELECT * FROM {$table}";
@@ -89,7 +89,7 @@ public function insert(string $table, array $data): array {
         $conditions[] = "{$key} = :{$key}";
         $params[$key] = $value;
       }
-      $sql .= " WHERE " . implode(' AND ', $conditions);
+      $sql .= " WHERE " . implode($use_or ? ' OR ' : ' AND ', $conditions);
     }
     
     $stmt = $this->pdo->prepare($sql);
@@ -214,5 +214,40 @@ public function insert(string $table, array $data): array {
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll();
+  }
+
+  public function begin_transaction(): bool {
+    if ($this->pdo->inTransaction()) {
+      Logger::warning("Transaction already in progress");
+      return false;
+    }
+    Logger::all("Begin transaction");
+    return $this->pdo->beginTransaction();
+  }
+  
+  public function commit(): bool {
+    if (!$this->pdo->inTransaction()) {
+      Logger::warning("No transaction to commit");
+      return false;
+    }
+    Logger::all("Commit transaction");
+    return $this->pdo->commit();
+  }
+  
+  public function rollback(): bool {
+    if (!$this->pdo->inTransaction()) {
+      Logger::warning("No transaction to rollback");
+      return false;
+    }
+    Logger::warning("Rollback transaction");
+    return $this->pdo->rollBack();
+  }
+  
+  public function in_transaction(): bool {
+    return $this->pdo->inTransaction();
+  }
+
+  public function last_insert_id(string $table): int {
+    return (int) $this->pdo->lastInsertId();
   }
 }

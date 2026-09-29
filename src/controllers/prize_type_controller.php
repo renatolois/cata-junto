@@ -11,6 +11,12 @@ class PrizeTypeController extends BaseController {
     parent::__construct($service);
   }
 
+  /*
+  GET /prize-type
+  GET /prize-type?active=1
+  GET /prize-type?name=<NAME>
+  GET /prize-type?id=<ID>
+  */
   public function list(): void {
     $active = $this->get_query('active');
     $name = $this->get_query('name');
@@ -32,7 +38,9 @@ class PrizeTypeController extends BaseController {
       return;
     } else if ($active !== null) {
       $active = filter_var($active, FILTER_VALIDATE_BOOLEAN);
-      $result = $active ? $this->service->find_all_active() : $this->service->find_all();
+      $result = $active
+        ? $this->service->find_all_active()
+        : $this->service->find_all();
       $this->handle_result($result);
       return;
     }
@@ -41,6 +49,9 @@ class PrizeTypeController extends BaseController {
     $this->handle_result($result);
   }
 
+  /*
+  POST /prize-type
+  */
   public function create(): void {
     $data = $this->get_body();
     if (empty($data)) {
@@ -52,6 +63,9 @@ class PrizeTypeController extends BaseController {
     $this->handle_result($result, 201);
   }
 
+  /*
+  PUT /prize-type/{id}
+  */
   public function update(): void {
     $id = $this->get_route('id');
     if (!$id) {
@@ -69,17 +83,9 @@ class PrizeTypeController extends BaseController {
     $this->handle_result($result);
   }
 
-  public function destroy(): void {
-    $id = $this->get_route('id');
-    if (!$id) {
-      $this->error_response('ID not provided', 400);
-      return;
-    }
-
-    $result = $this->service->hard_delete((int) $id);
-    $this->handle_result($result);
-  }
-
+  /*
+  PUT /prize-type/{id}/activate
+  */
   public function activate(): void {
     $id = $this->get_route('id');
     if (!$id) {
@@ -91,6 +97,9 @@ class PrizeTypeController extends BaseController {
     $this->handle_result($result);
   }
 
+  /*
+  PUT /prize-type/{id}/deactivate
+  */
   public function deactivate(): void {
     $id = $this->get_route('id');
     if (!$id) {

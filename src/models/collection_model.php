@@ -4,62 +4,65 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Core\Base\BaseModel;
+use App\Core\Utils\NeutralValue;
 
 class CollectionModel extends BaseModel {
   public function __construct() {
     parent::__construct(
       attributes_and_types: [
-        ['id', 'string'],
+        ['id', 'uuid'],
         ['collected_by', 'uuid'],
         ['material_type_id', 'int'],
         ['collected_at', 'datetime'],
-        ['collect_type', 'string'], // weight or unit
+        ['collect_type', 'string'],
         ['quantity', 'float'],
         ['observation', 'string'],
         ['active', 'bool'],
       ],
       fillables: [
-        'collected_by', 'material_type_id', 'collected_at',
-        'collect_type', 'quantity', 'observation', 
-        'active', 'paid_value'
+        'material_type_id', 'collect_type', 'observation'
       ],
       hiddens: []
     );
   }
 
   public function get_id(): string {
-    return $this->id;
+    return (string) ($this->id ?? '');
   }
 
-  public function get_collected_by(): string {
+  public function get_collected_by(): string|NeutralValue {
     return $this->collected_by;
   }
 
   public function get_material_type_id(): int {
-    return (int) $this->material_type_id;
+    return (int) ($this->material_type_id ?? 0);
   }
 
-  public function get_collected_at(): string {
+  public function get_collected_at(): string|NeutralValue {
     return $this->collected_at;
   }
 
-  public function get_collect_type(): string {
+  public function get_collect_type(): string|NeutralValue {
     return $this->collect_type;
   }
 
-  public function get_quantity(): float {
-    return (float) $this->quantity;
+  public function get_quantity(): float|NeutralValue {
+    return $this->quantity;
   }
 
-  public function get_observation(): ?string {
+  public function get_observation(): string|NeutralValue {
     return $this->observation;
   }
 
   public function is_active(): bool {
-    return (bool) $this->active;
+    return (bool) ($this->active ?? false);
   }
 
-  public function set_collected_by(string $collected_by): void {
+  public function set_id(string $id): void {
+    $this->id = $id;
+  }
+
+  public function set_collected_by(string|NeutralValue $collected_by): void {
     $this->collected_by = $collected_by;
   }
 
@@ -67,19 +70,23 @@ class CollectionModel extends BaseModel {
     $this->material_type_id = $material_type_id;
   }
 
-  public function set_collected_at(string $collected_at): void {
+  public function set_collected_at(string|NeutralValue $collected_at): void {
     $this->collected_at = $collected_at;
   }
 
-  public function set_collect_type(string $collect_type): void {
+  public function set_collect_type(string|NeutralValue $collect_type): void {
     $this->collect_type = $collect_type;
   }
 
-  public function set_quantity(float $quantity): void {
+  public function set_quantity(float|NeutralValue $quantity): void {
+    if ($quantity instanceof NeutralValue) {
+      $this->quantity = $quantity;
+      return;
+    }
     $this->quantity = round($quantity, 2);
   }
 
-  public function set_observation(?string $observation): void {
+  public function set_observation(string|NeutralValue $observation): void {
     $this->observation = $observation;
   }
 

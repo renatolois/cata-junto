@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Core\Base;
 
+use Core\Utils\EnvLoader;
+
 abstract class BaseAdapter {
   protected array $config = [];
 
@@ -25,20 +27,8 @@ abstract class BaseAdapter {
   }
 
   protected function load_env(): array {
-    $env_file = __DIR__ . '/../../.env';
-    $vars = [];
-
-    if (file_exists($env_file)) {
-      $vars = parse_ini_file($env_file, false, INI_SCANNER_RAW);
-    }
-
-    return [
-      'db_host'      => $vars['DB_HOST'] ?? 'localhost',
-      'db_port'      => $vars['DB_PORT'] ?? '3306',
-      'db_name'      => $vars['DB_NAME'] ?? 'cooperativa',
-      'db_user'      => $vars['DB_USER'] ?? 'root',
-      'db_password'  => $vars['DB_PASSWORD'] ?? '',
-      'log_level'    => $vars['LOG_LEVEL'] ?? 'all',
-    ];
+    return EnvLoader::load();
   }
+
+  abstract public function last_insert_id(string $table): int;  
 }

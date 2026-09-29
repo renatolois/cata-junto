@@ -33,9 +33,8 @@ class RoleRepository extends BaseRepository {
 
   public function create_role(array $data): RoleModel {
     $db_data = $this->map_to_database($data);
-    $this->db->insert($this->table, $db_data);
-    $id = (int) $this->db->lastInsertId();
-    return $this->find_by_id($id);
+    $inserted = $this->db->insert($this->table, $db_data);
+    return $this->hydrate($inserted);
   }
 
   public function update_role(int $id, array $data): RoleModel {
@@ -51,9 +50,13 @@ class RoleRepository extends BaseRepository {
   public function hydrate(array $data): RoleModel {
     $role = new RoleModel();
 
-    $role->set_id($data['id'] ?? null);
-    $role->set_name($data['name'] ?? NeutralValue::instance());
-    $role->set_active($data['active'] ?? true);
+    $role->id = $data['id'] ?? null;
+
+    if (isset($data['name'])) {
+      $role->set_name($data['name']);
+    }
+
+    $role->set_active((bool) ($data['active'] ?? true));
 
     return $role;
   }
@@ -70,7 +73,7 @@ class RoleRepository extends BaseRepository {
     }
 
     if (isset($data['active'])) {
-      $mapped['active'] = (int) $data['active'];
+      $mapped['active'] = (int) (bool) $data['active'];
     }
 
     return $mapped;

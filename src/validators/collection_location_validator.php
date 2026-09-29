@@ -14,7 +14,7 @@ class CollectionLocationValidator extends BaseValidator {
     $this->errors = [];
 
     if (!$obj instanceof CollectionLocationModel) {
-      $this->errors[] = "The object must be an instance of ContractModel.";
+      $this->errors[] = "The object must be an instance of CollectionLocationModel.";
       return $this->errors;
     }
 

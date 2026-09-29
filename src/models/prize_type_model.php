@@ -21,7 +21,7 @@ class PrizeTypeModel extends BaseModel {
       hiddens: []
     );
 
-    if (empty($this->active)) {
+    if (!isset($this->active)) {
         $this->active = true;
     }
   }
@@ -44,6 +44,10 @@ class PrizeTypeModel extends BaseModel {
 
   public function is_active(): bool {
     return (bool) $this->active;
+  }
+
+  public function set_id(int $id): void {
+    $this->id = $id;
   }
 
   public function set_name(string $name): void {

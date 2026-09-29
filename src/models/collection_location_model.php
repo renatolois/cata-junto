@@ -27,20 +27,20 @@ class CollectionLocationModel extends BaseModel {
         ['active', 'bool']
       ],
       fillables: [
-        'responsable_email', 'verified_email', 'responsable_phone_number', 
+        'responsable_email', 'responsable_phone_number', 
         'street', 'number', 'neighborhood', 'complement',
-        'city', 'state', 'cep', 'current_points', 'active'
+        'city', 'state', 'cep'
       ],
       hiddens: [
         'password_hash'
       ]
     );
 
-    if (empty($this->current_points)) {
+    if (!isset($this->current_points)) {
       $this->current_points = 0;
     }
     
-    if (empty($this->active)) {
+    if (!isset($this->active)) {
       $this->active = true;
     }
 
@@ -49,7 +49,6 @@ class CollectionLocationModel extends BaseModel {
     }
   }
 
-  // Getters
   public function get_id(): string {
     return $this->id;
   }
@@ -79,7 +78,7 @@ class CollectionLocationModel extends BaseModel {
   }
 
   public function get_complement(): string {
-    return $this->complement ?? '';
+    return $this->complement;
   }
 
   public function get_city(): string {
@@ -102,7 +101,10 @@ class CollectionLocationModel extends BaseModel {
     return (bool) ($this->active ?? false);
   }
 
-  // Setters
+  public function set_id(string $id): void {
+    $this->id = $id;
+  }
+
   public function set_responsable_email(string $responsable_email): void {
     $this->responsable_email = $responsable_email;
   }
@@ -173,7 +175,6 @@ class CollectionLocationModel extends BaseModel {
     $this->cep = $cep;
   }
 
-  // Métodos de ação
   public function activate(): void {
     $this->active = true;
   }
@@ -184,5 +185,13 @@ class CollectionLocationModel extends BaseModel {
 
   public function verify_password(string $password): bool {
     return password_verify($password, $this->password_hash ?? '');
+  }
+
+  public function get_password_hash(): string {
+      return $this->password_hash ?? '';
+  }
+  
+  public function set_password_hash(string|\App\Core\Utils\NeutralValue $password_hash): void {
+      $this->password_hash = $password_hash;
   }
 }

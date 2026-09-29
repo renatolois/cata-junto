@@ -31,26 +31,28 @@ class CollectionLocationController extends BaseController {
     }
 
     if ($id !== null) {
-      $location = $this->service->find_by_id($id);
-      $this->json_response($location ? $location->to_array() : []);
+      $result = $this->service->find_by_id($id);
+      $this->handle_result($result);
       return;
     } else if ($email !== null) {
-      $location = $this->service->find_by_email($email);
-      $this->json_response($location ? $location->to_array() : []);
+      $result = $this->service->find_by_email($email);
+      $this->handle_result($result);
       return;
     } else if ($cep !== null) {
-      $locations = $this->service->find_by_cep($cep);
-      $this->json_response(array_map(fn($l) => $l->to_array(), $locations));
+      $result = $this->service->find_by_cep($cep);
+      $this->handle_result($result);
       return;
     } else if ($active !== null) {
       $active = filter_var($active, FILTER_VALIDATE_BOOLEAN);
-      $locations = $active ? $this->service->find_all_active() : $this->service->find_all();
-      $this->json_response(array_map(fn($l) => $l->to_array(), $locations));
+      $result = $active
+        ? $this->service->find_all_active()
+        : $this->service->find_all();
+      $this->handle_result($result);
       return;
     }
 
-    $locations = $this->service->find_all();
-    $this->json_response(array_map(fn($l) => $l->to_array(), $locations));
+    $result = $this->service->find_all();
+    $this->handle_result($result);
   }
 
   /*
@@ -59,17 +61,12 @@ class CollectionLocationController extends BaseController {
   public function create(): void {
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not sent', 400);
       return;
     }
 
     $result = $this->service->create($data);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array(), 201);
+    $this->handle_result($result, 201);
   }
 
   /*
@@ -85,17 +82,12 @@ class CollectionLocationController extends BaseController {
 
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not sent', 400);
       return;
     }
 
     $result = $this->service->update($id, $data);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array());
+    $this->handle_result($result);
   }
 
   /*
@@ -109,12 +101,7 @@ class CollectionLocationController extends BaseController {
     }
 
     $result = $this->service->hard_delete($id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Collection location deleted successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -128,12 +115,7 @@ class CollectionLocationController extends BaseController {
     }
 
     $result = $this->service->activate($id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Collection location activated successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -147,12 +129,7 @@ class CollectionLocationController extends BaseController {
     }
 
     $result = $this->service->deactivate($id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Collection location deactivated successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -173,8 +150,9 @@ class CollectionLocationController extends BaseController {
     }
 
     $result = $this->service->verify_password($id, $data['password']);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
+
+    if ($this->is_error_result($result)) {
+      $this->handle_error($result['errors']);
       return;
     }
 
@@ -199,12 +177,7 @@ class CollectionLocationController extends BaseController {
     }
 
     $result = $this->service->add_points($id, (int) $data['points']);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Points added successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -225,11 +198,6 @@ class CollectionLocationController extends BaseController {
     }
 
     $result = $this->service->deduct_points($id, (int) $data['points']);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Points deducted successfully']);
+    $this->handle_result($result);
   }
 }

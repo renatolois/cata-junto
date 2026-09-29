@@ -21,7 +21,7 @@ class PersonController extends BaseController {
     $active = $this->get_query('active');
     $email = $this->get_query('email');
     $cpf = $this->get_query('cpf');
-    $id = $this->get_query('id');
+    $id = $this->get_route('id') ?? $this->get_query('id');
 
     $filters = array_filter([$active, $email, $cpf, $id], fn($v) => $v !== null);
     if (count($filters) > 1) {

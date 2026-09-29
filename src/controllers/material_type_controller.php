@@ -29,22 +29,24 @@ class MaterialTypeController extends BaseController {
     }
 
     if ($id !== null) {
-      $material_type = $this->service->find_by_id((int) $id);
-      $this->json_response($material_type ? $material_type->to_array() : []);
+      $result = $this->service->find_by_id((int) $id);
+      $this->handle_result($result);
       return;
     } else if ($name !== null) {
-      $material_type = $this->service->find_by_name($name);
-      $this->json_response($material_type ? $material_type->to_array() : []);
+      $result = $this->service->find_by_name($name);
+      $this->handle_result($result);
       return;
     } else if ($active !== null) {
       $active = filter_var($active, FILTER_VALIDATE_BOOLEAN);
-      $material_types = $active ? $this->service->find_all_active() : $this->service->find_all();
-      $this->json_response(array_map(fn($m) => $m->to_array(), $material_types));
+      $result = $active
+        ? $this->service->find_all_active()
+        : $this->service->find_all();
+      $this->handle_result($result);
       return;
     }
 
-    $material_types = $this->service->find_all();
-    $this->json_response(array_map(fn($m) => $m->to_array(), $material_types));
+    $result = $this->service->find_all();
+    $this->handle_result($result);
   }
 
   /*
@@ -53,17 +55,12 @@ class MaterialTypeController extends BaseController {
   public function create(): void {
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not sent', 400);
       return;
     }
 
     $result = $this->service->create($data);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array(), 201);
+    $this->handle_result($result, 201);
   }
 
   /*
@@ -78,36 +75,12 @@ class MaterialTypeController extends BaseController {
 
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not sended', 400);
+      $this->error_response('Data not sent', 400);
       return;
     }
 
     $result = $this->service->update((int) $id, $data);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 422);
-      return;
-    }
-
-    $this->json_response($result->to_array());
-  }
-
-  /*
-  DELETE /material-type/{id}
-  */
-  public function delete(): void {
-    $id = $this->get_route('id');
-    if (!$id) {
-      $this->error_response('ID not provided', 400);
-      return;
-    }
-
-    $result = $this->service->hard_delete((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Material type deleted successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -121,12 +94,7 @@ class MaterialTypeController extends BaseController {
     }
 
     $result = $this->service->activate_weight((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Weight calculation activated successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -140,12 +108,7 @@ class MaterialTypeController extends BaseController {
     }
 
     $result = $this->service->deactivate_weight((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Weight calculation deactivated successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -159,12 +122,7 @@ class MaterialTypeController extends BaseController {
     }
 
     $result = $this->service->activate_unit((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Unit calculation activated successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -178,12 +136,7 @@ class MaterialTypeController extends BaseController {
     }
 
     $result = $this->service->deactivate_unit((int) $id);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
-      return;
-    }
-
-    $this->json_response(['message' => 'Unit calculation deactivated successfully']);
+    $this->handle_result($result);
   }
 
   /*
@@ -204,15 +157,16 @@ class MaterialTypeController extends BaseController {
     }
 
     $result = $this->service->calculate_by_weight((int) $id, (float) $data['weight']);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
+
+    if ($this->is_error_result($result)) {
+      $this->handle_error($result['errors']);
       return;
     }
 
     $this->json_response([
       'weight' => (float) $data['weight'],
-      'price' => $result['price'],
-      'points' => $result['points']
+      'price'  => $result['price'],
+      'points' => $result['points'],
     ]);
   }
 
@@ -234,15 +188,16 @@ class MaterialTypeController extends BaseController {
     }
 
     $result = $this->service->calculate_by_units((int) $id, (int) $data['units']);
-    if (isset($result['errors'])) {
-      $this->error_response($result['errors'], 400);
+
+    if ($this->is_error_result($result)) {
+      $this->handle_error($result['errors']);
       return;
     }
 
     $this->json_response([
-      'units' => (int) $data['units'],
-      'price' => $result['price'],
-      'points' => $result['points']
+      'units'  => (int) $data['units'],
+      'price'  => $result['price'],
+      'points' => $result['points'],
     ]);
   }
 }

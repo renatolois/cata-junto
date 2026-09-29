@@ -53,14 +53,16 @@
 *(Herda todos os atributos da classe Coleta)*
 - `Valor pago -> Float`
 
-- ## Coleta Residencial
+- ## Coleta Residencial !!!! atenção: no código, usei deactivation, mas tem mais a ver com rejeição da solicitação do que com o campo "active" da super classe "Coleta" !!!!
 *(Herda os atributos da classe Coleta e adiciona os seguintes)*
 - `ID do Local de Coleta (FK Local de Coleta) -> UUID`
 - `Solicitado Em -> Datetime`
+- `Desativado Por -> UUID`
 - `Data de Desativação -> Datetime`
 - `Justificativa de Desativação -> String`
 - `Descrição -> String`
 - `Status -> String`
+- `Pontos Concedidos -> Int`
 
 - ## Função
 - `ID -> Int`
@@ -130,8 +132,8 @@
 ### Coleta Residencial
 14. Um local de coleta pode ter de zero a várias coletas residenciais associadas (Local de Coleta 1:N Coleta Residencial).
 15. Cada coleta residencial pertence a exatamente um local de coleta, e possui exatamente um tipo de material (Tipo de Material 1:N Coleta) e, quando concluída, a um único vínculo (Vínculo 1:N Coleta).
-16. Enquanto o status for `pendente`, os campos `coletado por` e `coletado em` permanecem nulos. Quando a coleta é efetivada (status `concluída`), ambos os campos devem ser preenchidos, e o campo `quantidade` e `tipo de coleta` torna-se obrigatório.
-17. Uma coleta com status `cancelado` não pode ser descancelada (não é possível alterar seu status para `pendente` ou `concluída`). Se necessário, deve-se criar uma nova coleta residencial.
+16. Enquanto o status for `pendente`, os campos `coletado por` e `coletado em` permanecem nulos. Quando a coleta é efetivada (status `concluída`), ambos os campos devem ser preenchidos, e o campo `quantidade` torna-se obrigatório.
+17. Uma coleta com status `cancelado` não pode ser descancelada (não é possível alterar seu status para `pendente` ou `concluído` ou `rejeitado`). Se necessário, deve-se criar uma nova coleta residencial. Uma coleta só pode ser rejeitada enquanto `pendente`.
 18. Caso cancelado, a data de cancelamento deve ser registrada em data de realização.
 19. O usuário define informações na `descrição` enquanto os dados de fato devem ser definidos pelo cooperado.
 20. Uma coleta residencial só poderá ter dados alterados enquanto estiver com `status` igual a `pendente`.

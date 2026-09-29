@@ -10,7 +10,7 @@ use App\Core\Utils\NeutralValue;
 
 class ContractValidator extends BaseValidator {
   
-  private const ALLOWED_STATUSES = ['pending', 'canceled', 'approved', 'rejected', 'dismissed'];
+  private const ALLOWED_STATUSES = ['pending', 'cancelled', 'approved', 'rejected', 'dismissed'];
   
   private array $optional_fields = [
     'responded_by_id', 'contract_end_by', 'responded_at', 
@@ -21,7 +21,7 @@ class ContractValidator extends BaseValidator {
     $this->errors = [];
 
     if (!$obj instanceof ContractModel) {
-      $this->errors[] = "The object must be an instance of RoleModel.";
+      $this->errors[] = "The object must be an instance of ContractModel.";
       return $this->errors;
     }
 

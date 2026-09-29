@@ -25,13 +25,29 @@ class ResidentialCollectionRepository extends BaseRepository {
     return array_map([$this, 'hydrate'], $result);
   }
 
+  public function find_by_collection_location_id_and_status(string $collection_location_id, string $status): array {
+    $result = $this->db->select_where(
+      $this->table,
+      [
+        'collection_location_id' => $collection_location_id,
+        'status'                 => $status
+      ]
+    );
+    return array_map([$this, 'hydrate'], $result);
+  }
+
+  public function find_all_active(): array {
+    $result = $this->db->select($this->table, ['active' => 1]);
+    return array_map([$this, 'hydrate'], $result);
+  }
+
   public function find_all(): array {
     $result = $this->db->select($this->table);
     return array_map([$this, 'hydrate'], $result);
   }
 
   public function create_residential_collection(array $data): ResidentialCollectionModel {
-    if (!isset($data['id'])) {
+    if (empty($data['id'])) {
       $data['id'] = $this->generate_uuid();
     }
 
@@ -46,27 +62,41 @@ class ResidentialCollectionRepository extends BaseRepository {
     return $this->find_by_id($id);
   }
 
-  public function delete_residential_collection(string $id): bool {
-    return $this->db->update($this->table, $id, ['status' => 'inactive']);
-  }
-
   public function hydrate(array $data): ResidentialCollectionModel {
     $collection = new ResidentialCollectionModel();
 
-    $collection->set_id($data['id'] ?? null);
+    $collection->id = $data['id'] ?? null;
+
+    // NOT NULL
+    if (isset($data['collection_location_id'])) {
+      $collection->set_collection_location_id($data['collection_location_id']);
+    }
+    if (isset($data['collect_type'])) {
+      $collection->set_collect_type($data['collect_type']);
+    }
+    if (isset($data['status'])) {
+      $collection->set_status($data['status']);
+    }
+
+    // Nullable
     $collection->set_collected_by($data['collected_by'] ?? NeutralValue::instance());
-    $collection->set_material_type_id((int) ($data['material_type_id'] ?? 0));
     $collection->set_collected_at($data['collected_at'] ?? NeutralValue::instance());
-    $collection->set_collect_type($data['collect_type'] ?? NeutralValue::instance());
-    $collection->set_quantity((float) ($data['quantity'] ?? 0));
     $collection->set_observation($data['observation'] ?? NeutralValue::instance());
-    $collection->set_active((bool) ($data['active'] ?? true));
-    $collection->set_collection_location_id($data['collection_location_id'] ?? NeutralValue::instance());
     $collection->set_requested_at($data['requested_at'] ?? NeutralValue::instance());
-    $collection->set_description($data['description'] ?? NeutralValue::instance());
-    $collection->set_status($data['status'] ?? 'pending');
+    $collection->set_rejected_by($data['rejected_by'] ?? NeutralValue::instance());
     $collection->set_deactivation_at($data['deactivation_at'] ?? NeutralValue::instance());
     $collection->set_deactivation_justification($data['deactivation_justification'] ?? NeutralValue::instance());
+    $collection->set_description($data['description'] ?? NeutralValue::instance());
+
+    // NOT NULL com default ou nullable numérico
+    $collection->set_material_type_id((int) ($data['material_type_id'] ?? 0));
+    $collection->set_quantity(
+      isset($data['quantity']) ? (float) $data['quantity'] : NeutralValue::instance()
+    );
+    $collection->set_conceded_points((int) ($data['conceded_points'] ?? 0));
+
+    // Default
+    $collection->set_active((bool) ($data['active'] ?? true));
 
     return $collection;
   }
@@ -95,7 +125,7 @@ class ResidentialCollectionRepository extends BaseRepository {
     }
 
     if (isset($data['quantity'])) {
-      $mapped['quantity'] = $data['quantity'];
+      $mapped['quantity'] = $data['quantity'] instanceof NeutralValue ? null : $data['quantity'];
     }
 
     if (isset($data['observation'])) {
@@ -103,7 +133,7 @@ class ResidentialCollectionRepository extends BaseRepository {
     }
 
     if (isset($data['active'])) {
-      $mapped['active'] = (int) $data['active'];
+      $mapped['active'] = (int) (bool) $data['active'];
     }
 
     if (isset($data['collection_location_id'])) {
@@ -114,12 +144,8 @@ class ResidentialCollectionRepository extends BaseRepository {
       $mapped['requested_at'] = $data['requested_at'] instanceof NeutralValue ? null : $data['requested_at'];
     }
 
-    if (isset($data['description'])) {
-      $mapped['description'] = $data['description'] instanceof NeutralValue ? null : $data['description'];
-    }
-
-    if (isset($data['status'])) {
-      $mapped['status'] = $data['status'];
+    if (isset($data['rejected_by'])) {
+      $mapped['rejected_by'] = $data['rejected_by'] instanceof NeutralValue ? null : $data['rejected_by'];
     }
 
     if (isset($data['deactivation_at'])) {
@@ -128,6 +154,18 @@ class ResidentialCollectionRepository extends BaseRepository {
 
     if (isset($data['deactivation_justification'])) {
       $mapped['deactivation_justification'] = $data['deactivation_justification'] instanceof NeutralValue ? null : $data['deactivation_justification'];
+    }
+
+    if (isset($data['description'])) {
+      $mapped['description'] = $data['description'] instanceof NeutralValue ? null : $data['description'];
+    }
+
+    if (isset($data['status'])) {
+      $mapped['status'] = $data['status'];
+    }
+
+    if (isset($data['conceded_points'])) {
+      $mapped['conceded_points'] = (int) $data['conceded_points'];
     }
 
     return $mapped;

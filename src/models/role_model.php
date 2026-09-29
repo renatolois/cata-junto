@@ -31,6 +31,10 @@ class RoleModel extends BaseModel {
   public function is_active(): bool {
     return (bool) $this->active;
   }
+  
+  public function set_id(int $id): void {
+    $this->id = $id;
+  }
 
   public function set_name(string $name): void {
     $this->name = $name;

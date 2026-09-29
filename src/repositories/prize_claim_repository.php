@@ -38,9 +38,8 @@ class PrizeClaimRepository extends BaseRepository {
 
   public function create_prize_claim(array $data): PrizeClaimModel {
     $db_data = $this->map_to_database($data);
-    $this->db->insert($this->table, $db_data);
-    $id = (int) $this->db->lastInsertId();
-    return $this->find_by_id($id);
+    $inserted = $this->db->insert($this->table, $db_data);
+    return $this->hydrate($inserted);
   }
 
   public function update_prize_claim(int $id, array $data): PrizeClaimModel {
@@ -56,12 +55,22 @@ class PrizeClaimRepository extends BaseRepository {
   public function hydrate(array $data): PrizeClaimModel {
     $prize_claim = new PrizeClaimModel();
 
-    $prize_claim->set_id($data['id'] ?? null);
-    $prize_claim->set_claimed_by($data['claimed_by'] ?? NeutralValue::instance());
-    $prize_claim->set_prize_type_id((int) ($data['prize_type_id'] ?? 0));
-    $prize_claim->set_status($data['status'] ?? 'pending');
+    $prize_claim->id = $data['id'] ?? null;
+
+    // NOT NULL
+    if (isset($data['claimed_by'])) {
+      $prize_claim->set_claimed_by($data['claimed_by']);
+    }
+    if (isset($data['status'])) {
+      $prize_claim->set_status($data['status']);
+    }
+
+    // Nullable
     $prize_claim->set_claimed_at($data['claimed_at'] ?? NeutralValue::instance());
     $prize_claim->set_collected_at($data['collected_at'] ?? NeutralValue::instance());
+
+    // NOT NULL com default
+    $prize_claim->set_prize_type_id((int) ($data['prize_type_id'] ?? 0));
 
     return $prize_claim;
   }

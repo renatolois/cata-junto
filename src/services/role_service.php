@@ -102,7 +102,7 @@ class RoleService extends BaseService {
     }
   }
 
-  public function find_by_id(int $id): ?RoleModel|array {
+  public function find_by_id(int $id): null|RoleModel|array {
     try {
       return $this->repository->find_by_id($id);
     } catch (Exception $e) {
@@ -118,7 +118,7 @@ class RoleService extends BaseService {
     }
   }
 
-  public function find_by_name(string $name): ?RoleModel|array {
+  public function find_by_name(string $name): null|RoleModel|array {
     try {
       return $this->repository->find_by_name($name);
     } catch (Exception $e) {

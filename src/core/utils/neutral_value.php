@@ -18,6 +18,6 @@ class NeutralValue {
   }
 
   public function __toString(): string{
-  	return 'Neutral';
+  	return '';
   }
 }

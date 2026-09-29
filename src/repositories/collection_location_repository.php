@@ -47,7 +47,7 @@ class CollectionLocationRepository extends BaseRepository {
   }
 
   public function create_collection_location(array $data): CollectionLocationModel {
-    if (!isset($data['id'])) {
+    if (empty($data['id'])) {
       $data['id'] = $this->generate_uuid();
     }
 
@@ -69,18 +69,40 @@ class CollectionLocationRepository extends BaseRepository {
   public function hydrate(array $data): CollectionLocationModel {
     $collection_location = new CollectionLocationModel();
 
-    $collection_location->set_id($data['id'] ?? null);
-    $collection_location->set_responsable_email($data['responsable_email'] ?? NeutralValue::instance());
+    $collection_location->id = $data['id'] ?? null;
+
+    if (isset($data['responsable_email'])) {
+      $collection_location->set_responsable_email($data['responsable_email']);
+    }
+    if (isset($data['password_hash'])) {
+      $collection_location->set_password_hash($data['password_hash']);
+    }
+    if (isset($data['responsable_phone_number'])) {
+      $collection_location->set_responsable_phone_number($data['responsable_phone_number']);
+    }
+    if (isset($data['street'])) {
+      $collection_location->set_street($data['street']);
+    }
+    if (isset($data['number'])) {
+      $collection_location->set_number($data['number']);
+    }
+    if (isset($data['neighborhood'])) {
+      $collection_location->set_neighborhood($data['neighborhood']);
+    }
+    if (isset($data['complement'])) {
+      $collection_location->set_complement($data['complement']);
+    }
+    if (isset($data['city'])) {
+      $collection_location->set_city($data['city']);
+    }
+    if (isset($data['state'])) {
+      $collection_location->set_state($data['state']);
+    }
+    if (isset($data['cep'])) {
+      $collection_location->set_cep($data['cep']);
+    }
+
     $collection_location->set_verified_email((bool) ($data['verified_email'] ?? false));
-    $collection_location->set_password_hash($data['password_hash'] ?? NeutralValue::instance());
-    $collection_location->set_responsable_phone_number($data['responsable_phone_number'] ?? NeutralValue::instance());
-    $collection_location->set_street($data['street'] ?? NeutralValue::instance());
-    $collection_location->set_number($data['number'] ?? NeutralValue::instance());
-    $collection_location->set_neighborhood($data['neighborhood'] ?? NeutralValue::instance());
-    $collection_location->set_complement($data['complement'] ?? NeutralValue::instance());
-    $collection_location->set_city($data['city'] ?? NeutralValue::instance());
-    $collection_location->set_state($data['state'] ?? NeutralValue::instance());
-    $collection_location->set_cep($data['cep'] ?? NeutralValue::instance());
     $collection_location->set_current_points((int) ($data['current_points'] ?? 0));
     $collection_location->set_active((bool) ($data['active'] ?? true));
 
@@ -99,7 +121,7 @@ class CollectionLocationRepository extends BaseRepository {
     }
 
     if (isset($data['verified_email'])) {
-      $mapped['verified_email'] = (int) $data['verified_email'];
+      $mapped['verified_email'] = (int) (bool) $data['verified_email'];
     }
 
     if (isset($data['password_hash'])) {
@@ -143,7 +165,7 @@ class CollectionLocationRepository extends BaseRepository {
     }
 
     if (isset($data['active'])) {
-      $mapped['active'] = (int) $data['active'];
+      $mapped['active'] = (int) (bool) $data['active'];
     }
 
     return $mapped;

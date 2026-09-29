@@ -37,7 +37,7 @@ class PersonRepository extends BaseRepository {
   }
 
   public function create_person(array $data): PersonModel {
-    if (!isset($data['id'])) {
+    if (empty($data['id'])) {
       $data['id'] = $this->generate_uuid();
     }
 
@@ -60,12 +60,26 @@ class PersonRepository extends BaseRepository {
     $person = new PersonModel();
 
     $person->id = $data['id'] ?? null;
-    $person->password_hash = $data['password_hash'] ?? NeutralValue::instance();
-    $person->set_cpf($data['cpf'] ?? NeutralValue::instance());
-    $person->set_name($data['name'] ?? NeutralValue::instance());
-    $person->set_email($data['email'] ?? NeutralValue::instance());
-    $person->set_phone_number($data['phone_number'] ?? NeutralValue::instance());
-    $person->set_birth_date($data['birth_date'] ?? NeutralValue::instance());
+
+    if (isset($data['password_hash'])) {
+      $person->password_hash = $data['password_hash'];
+    }
+    if (isset($data['cpf'])) {
+      $person->set_cpf($data['cpf']);
+    }
+    if (isset($data['name'])) {
+      $person->set_name($data['name']);
+    }
+    if (isset($data['email'])) {
+      $person->set_email($data['email']);
+    }
+    if (isset($data['phone_number'])) {
+      $person->set_phone_number($data['phone_number']);
+    }
+    if (isset($data['birth_date'])) {
+      $person->set_birth_date($data['birth_date']);
+    }
+
     $person->set_current_points((int) ($data['current_points'] ?? 0));
     $person->set_active((bool) ($data['active'] ?? true));
     $person->set_verified_email((bool) ($data['verified_email'] ?? false));
@@ -105,11 +119,11 @@ class PersonRepository extends BaseRepository {
     }
 
     if (isset($data['active'])) {
-      $mapped['active'] = (int) $data['active'];
+      $mapped['active'] = (int) (bool) $data['active'];
     }
 
     if (isset($data['verified_email'])) {
-      $mapped['verified_email'] = (int) $data['verified_email'];
+      $mapped['verified_email'] = (int) (bool) $data['verified_email'];
     }
 
     if (isset($data['password_hash'])) {

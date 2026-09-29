@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Core\Base\BaseModel;
+use App\Core\Utils\NeutralValue;
+
 
 class PrizeClaimModel extends BaseModel {
   public function __construct() {
@@ -23,7 +25,7 @@ class PrizeClaimModel extends BaseModel {
       hiddens: []
     );
 
-    if (empty($this->status)) {
+    if (!isset($this->status)) {
         $this->status = 'pending';
     }
   }
@@ -48,8 +50,12 @@ class PrizeClaimModel extends BaseModel {
     return $this->claimed_at;
   }
 
-  public function get_collected_at(): ?string {
-    return $this->collected_at ?? null;
+  public function get_collected_at(): string|NeutralValue {
+    return $this->collected_at;
+  }
+
+  public function set_id(int $id): void {
+    $this->id = $id;
   }
 
   public function set_claimed_by(string $claimed_by): void {
@@ -64,11 +70,11 @@ class PrizeClaimModel extends BaseModel {
     $this->status = $status;
   }
 
-  public function set_claimed_at(string $claimed_at): void {
+  public function set_claimed_at(string|NeutralValue $claimed_at): void {
     $this->claimed_at = $claimed_at;
   }
 
-  public function set_collected_at(?string $collected_at): void {
+  public function set_collected_at(string|NeutralValue $collected_at): void {
     $this->collected_at = $collected_at;
   }
 

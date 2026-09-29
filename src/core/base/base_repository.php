@@ -4,12 +4,13 @@ declare(strict_types=1);
 namespace Core\Base;
 
 use Db\Database;
+use Core\Base\BaseAdapter;
 
 abstract class BaseRepository {
-  protected Database $db;
+  protected BaseAdapter $db;
   protected string $table;
   
-  public function __construct(Database $db) {
+  public function __construct(BaseAdapter|Database $db) {
     $this->db = $db;
   }
   

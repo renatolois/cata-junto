@@ -1,7 +1,21 @@
-## adicionar verificacao de usuario na service
-## verificar pq a senha do mysql nao ta indo
+###############
+tirando current_points e active do fillables em person
+tirando current_points, active e verified email do collectionlocation
+tirando requested_at, rejected_by, deactivation_at, deactivation_justification, status, conceded_points de residential_collection
+tirando collected_by, collected_at, quantity, active do collection
+
+tirar points do person no minimundo
+tirar cancelar do claim no minimundo
+
+setar true no 'secure' em auth controller
+
+fazer residential collection adicionar pontos para collection location
+
+###############
+
+person model tem current points por compatibilidade
+
 adicionar auth middleware
-adicionar constantes de erros de banco de dados de acordo com o que estiver usando
 adicionar try catch nos controllers
 
 adicionar regra de negocio para limitar quantia de solicitacoes de coleta, deixar assim até conseguir testar tudo no front
@@ -11,4 +25,17 @@ cuidar da transação em prize_claim_service e em in_person_collection com rollb
 
 mexer em base router para proteger vulnerabilidades na url
 
-materialtyperepo -> find all active -> trocar AND por OR.
+adicionar paid_points em residential_collection
+
+adicionar em todos os models, em cada set, a possibilidade de receber NeutralValue
+
+nos services, ver se precisa trocar nomes dos erros para ficar coerente com os handlers do baseController, como not found error, service error, etc. embora pareça tudo certo
+
+feitos:
+
+## adicionar verificacao de usuario na service
+## verificar pq a senha do mysql nao ta indo
+## adicionar constantes de erros de banco de dados de acordo com o que estiver usando -> não fiz por erro no sql, php deve verificar todos os erros comuns. se sql retorna erro, é undefined behavior e retorna 500
+## materialtyperepo -> find all active -> trocar AND por OR.
+
+## nos hydrate, usa-se set_id(data['id'] ?? null) -> verificar como os set_id trata null -> não precisa, ja faz cast para '' e nao encontra id nenhum

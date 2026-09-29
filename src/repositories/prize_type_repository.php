@@ -33,9 +33,8 @@ class PrizeTypeRepository extends BaseRepository {
 
   public function create_prize_type(array $data): PrizeTypeModel {
     $db_data = $this->map_to_database($data);
-    $this->db->insert($this->table, $db_data);
-    $id = (int) $this->db->lastInsertId();
-    return $this->find_by_id($id);
+    $inserted = $this->db->insert($this->table, $db_data);
+    return $this->hydrate($inserted);
   }
 
   public function update_prize_type(int $id, array $data): PrizeTypeModel {
@@ -51,9 +50,15 @@ class PrizeTypeRepository extends BaseRepository {
   public function hydrate(array $data): PrizeTypeModel {
     $prize_type = new PrizeTypeModel();
 
-    $prize_type->set_id($data['id'] ?? null);
-    $prize_type->set_name($data['name'] ?? NeutralValue::instance());
-    $prize_type->set_description($data['description'] ?? NeutralValue::instance());
+    $prize_type->id = $data['id'] ?? null;
+
+    if (isset($data['name'])) {
+      $prize_type->set_name($data['name']);
+    }
+    if (isset($data['description'])) {
+      $prize_type->set_description($data['description']);
+    }
+
     $prize_type->set_cost_points((int) ($data['cost_points'] ?? 0));
     $prize_type->set_active((bool) ($data['active'] ?? true));
 
@@ -62,6 +67,7 @@ class PrizeTypeRepository extends BaseRepository {
 
   public function map_to_database(array $data): array {
     $mapped = [];
+
     if (isset($data['id'])) {
       $mapped['id'] = $data['id'];
     }
@@ -79,7 +85,7 @@ class PrizeTypeRepository extends BaseRepository {
     }
 
     if (isset($data['active'])) {
-      $mapped['active'] = (int) $data['active'];
+      $mapped['active'] = (int) (bool) $data['active'];
     }
 
     return $mapped;

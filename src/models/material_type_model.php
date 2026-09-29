@@ -33,9 +33,9 @@ class MaterialTypeModel extends BaseModel {
 
   public function get_id(): int {
     return (int) $this->id;
+  }
     
   public function get_name(): string {
-    }
     return $this->name;
   }
 

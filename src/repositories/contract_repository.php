@@ -36,6 +36,29 @@ class ContractRepository extends BaseRepository {
     return array_map([$this, 'hydrate'], $result);
   }
 
+  public function find_active(): array {
+    $results = $this->db->select_where(
+      $this->table,
+      [
+        'status'          => 'approved',
+        'contract_end_at' => null
+      ]
+    );
+    return array_map([$this, 'hydrate'], $results);
+  }
+
+  public function find_active_by_person_id(string $person_id): array {
+    $results = $this->db->select_where(
+      $this->table,
+      [
+        'person_id'       => $person_id,
+        'status'          => 'approved',
+        'contract_end_at' => null
+      ]
+    );
+    return array_map([$this, 'hydrate'], $results);
+  }
+
   public function find_pending_by_person_and_role(string $person_id, int $role_id): ?ContractModel {
     $results = $this->db->select_where(
       $this->table,
@@ -49,7 +72,7 @@ class ContractRepository extends BaseRepository {
     $data = $results[0] ?? null;
     return $data ? $this->hydrate($data) : null;
   }
-  
+
   public function find_active_by_person_and_role(string $person_id, int $role_id): ?ContractModel {
     $results = $this->db->select_where(
       $this->table,
@@ -64,7 +87,7 @@ class ContractRepository extends BaseRepository {
     $data = $results[0] ?? null;
     return $data ? $this->hydrate($data) : null;
   }
-  
+
   public function find_last_rejection_for_person_and_role(string $person_id, int $role_id): ?ContractModel {
     $results = $this->db->select_where(
       $this->table,
@@ -83,7 +106,7 @@ class ContractRepository extends BaseRepository {
   }
 
   public function create_contract(array $data): ContractModel {
-    if (!isset($data['id'])) {
+    if (empty($data['id'])) {
       $data['id'] = $this->generate_uuid();
     }
 
@@ -98,28 +121,22 @@ class ContractRepository extends BaseRepository {
     return $this->find_by_id($id);
   }
 
-  public function delete_contract(string $id): bool {
-    return $this->db->delete($this->table, $id);
-  }
-
-  public function count(): int {
-    $sql = "SELECT COUNT(*) as total FROM {$this->table}";
-    $stmt = $this->db->query($sql);
-    $result = $stmt->fetch();
-    return (int) $result['total'];
-  }
-
   public function hydrate(array $data): ContractModel {
     $contract = new ContractModel();
 
-    $contract->set_id($data['id'] ?? null);
-    $contract->set_person_id($data['person_id'] ?? NeutralValue::instance());
+    $contract->id = $data['id'] ?? null;
+
+    if (isset($data['person_id'])) {
+      $contract->set_person_id($data['person_id']);
+    }
+
     $contract->set_role_id((int) ($data['role_id'] ?? 0));
+    $contract->set_requested_at($data['requested_at'] ?? date('Y-m-d H:i:s'));
+    $contract->set_status($data['status'] ?? 'pending');
+
     $contract->set_responded_by_id($data['responded_by_id'] ?? NeutralValue::instance());
     $contract->set_contract_end_by($data['contract_end_by'] ?? NeutralValue::instance());
-    $contract->set_requested_at($data['requested_at'] ?? NeutralValue::instance());
     $contract->set_responded_at($data['responded_at'] ?? NeutralValue::instance());
-    $contract->set_status($data['status'] ?? 'pending');
     $contract->set_response_justification($data['response_justification'] ?? NeutralValue::instance());
     $contract->set_dismissal_justification($data['dismissal_justification'] ?? NeutralValue::instance());
     $contract->set_contract_end_at($data['contract_end_at'] ?? NeutralValue::instance());

@@ -22,7 +22,7 @@ class MaterialTypeRepository extends BaseRepository {
   }
 
   public function find_all_active(): array {
-    $result = $this->db->select($this->table, ['weight_active' => 1, 'unit_active' => 1]);
+    $result = $this->db->select($this->table, ['weight_active' => 1, 'unit_active' => 1], true);
     return array_map([$this, 'hydrate'], $result);
   }
 
@@ -33,9 +33,8 @@ class MaterialTypeRepository extends BaseRepository {
 
   public function create_material_type(array $data): MaterialTypeModel {
     $db_data = $this->map_to_database($data);
-    $this->db->insert($this->table, $db_data);
-    $id = (int) $this->db->lastInsertId();
-    return $this->find_by_id($id);
+    $inserted = $this->db->insert($this->table, $db_data);
+    return $this->hydrate($inserted);
   }
 
   public function update_material_type(int $id, array $data): MaterialTypeModel {
@@ -51,8 +50,12 @@ class MaterialTypeRepository extends BaseRepository {
   public function hydrate(array $data): MaterialTypeModel {
     $material_type = new MaterialTypeModel();
 
-    $material_type->set_id($data['id'] ?? null);
-    $material_type->set_name($data['name'] ?? NeutralValue::instance());
+    $material_type->id = $data['id'] ?? null;
+
+    if (isset($data['name'])) {
+      $material_type->set_name($data['name']);
+    }
+
     $material_type->set_price_per_weight((float) ($data['price_per_weight'] ?? 0));
     $material_type->set_points_per_weight((int) ($data['points_per_weight'] ?? 0));
     $material_type->set_price_per_unit((float) ($data['price_per_unit'] ?? 0));
@@ -91,11 +94,11 @@ class MaterialTypeRepository extends BaseRepository {
     }
 
     if (isset($data['weight_active'])) {
-      $mapped['weight_active'] = (int) $data['weight_active'];
+      $mapped['weight_active'] = (int) (bool) $data['weight_active'];
     }
 
     if (isset($data['unit_active'])) {
-      $mapped['unit_active'] = (int) $data['unit_active'];
+      $mapped['unit_active'] = (int) (bool) $data['unit_active'];
     }
 
     return $mapped;
