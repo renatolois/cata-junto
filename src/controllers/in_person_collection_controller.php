@@ -11,15 +11,6 @@ class InPersonCollectionController extends BaseController {
     parent::__construct($service);
   }
 
-  /*
-  GET /in-person-collection?id=<ID>
-  GET /in-person-collection?collected_by=<CONTRACT_ID>
-  GET /in-person-collection?collected_by=<CONTRACT_ID>&active=1
-  GET /in-person-collection?material_type_id=<ID>
-  GET /in-person-collection?collect_type=weight|unit
-  GET /in-person-collection?active=1
-  GET /in-person-collection
-  */
   public function list(): void {
     $id = $this->get_query('id');
     $collected_by = $this->get_query('collected_by');
@@ -73,15 +64,31 @@ class InPersonCollectionController extends BaseController {
     $this->handle_result($result);
   }
 
-  /*
-  POST /in-person-collection
-  */
+  public function list_my(): void {
+    $person_id = $this->get_route('auth_person_id');
+    if (!$person_id) {
+      $this->error_response('Unauthorized', 401);
+      return;
+    }
+
+    $result = $this->service->find_by_person($person_id);
+    $this->handle_result($result);
+  }
+
   public function create(): void {
     $data = $this->get_body();
     if (empty($data)) {
       $this->error_response('Data not sent', 400);
       return;
     }
+
+    $contract_id = $this->get_route('contract_id');
+    if (!$contract_id) {
+      $this->error_response('No active contract', 403);
+      return;
+    }
+
+    $data['collected_by'] = $contract_id;
 
     $result = $this->service->create($data);
     $this->handle_result($result, 201);

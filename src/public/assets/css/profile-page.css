@@ -1,0 +1,255 @@
+@import url('colors.css');
+
+.profile-content {
+    background-color: var(--bg-block);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 1rem;
+}
+
+.profile-content ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.profile-content ul li {
+    padding: 0.3rem;
+    background-color: var(--bg-alternative);
+}
+
+#role-list-ul {
+    gap: 0.1rem;
+}
+
+.profile-actions {
+    margin: 0.5rem 0 1rem;
+}
+
+.btn-primary {
+    background: #2e7d32;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.btn-primary:hover {
+    background: #1b5e20;
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: #e0e0e0;
+    color: #333;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #cfcfcf;
+}
+
+.contract-section {
+    margin-top: 1.5rem;
+}
+
+.contract-section h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.contract-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.contract-item {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    background: #f9f9f9;
+}
+
+.contract-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.contract-role {
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.contract-status {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-cancelled {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.status-dismissed {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.contract-dates {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-top: 0.25rem;
+}
+
+.contract-justification {
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 0.35rem;
+    opacity: 0.9;
+}
+
+.contract-empty {
+    font-size: 0.9rem;
+    opacity: 0.6;
+    font-style: italic;
+}
+
+.contract-actions {
+    margin-top: 0.5rem;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-overlay[hidden] {
+    display: none;
+}
+
+.modal {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.modal .form-item {
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.modal .form-item label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.modal .form-item input {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#edit-feedback[data-kind="error"],
+#contract-feedback[data-kind="error"] {
+    color: #c62828;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+#edit-feedback[data-kind="success"],
+#contract-feedback[data-kind="success"] {
+    color: #2e7d32;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+    .contract-item {
+        background: #2a2a2a;
+        border-color: #444;
+    }
+
+    .modal {
+        background: #2a2a2a;
+        color: #eee;
+    }
+
+    .modal .form-item input {
+        background: #1e1e1e;
+        border-color: #555;
+        color: #eee;
+    }
+
+    .btn-secondary {
+        background: #444;
+        color: #eee;
+    }
+
+    .btn-secondary:hover {
+        background: #555;
+    }
+}

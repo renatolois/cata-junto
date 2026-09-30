@@ -9,6 +9,7 @@ use App\Validators\InPersonCollectionValidator;
 use App\Repositories\InPersonCollectionRepository;
 use App\Repositories\ContractRepository;
 use App\Repositories\MaterialTypeRepository;
+use App\Core\Utils\NeutralValue;
 use Core\Utils\AppConstants;
 use Core\Utils\Logger;
 use Exception;
@@ -46,7 +47,8 @@ class InPersonCollectionService extends BaseService {
       if ($contract === null) {
         return ["errors" => ["collected_by" => "Contract not found."]];
       }
-      if ($contract->get_status() !== 'approved' || $contract->get_contract_end_at() !== null) {
+
+      if ($contract->get_status() !== 'approved' || !($contract->get_contract_end_at() instanceof NeutralValue)) {
         return ["errors" => ["collected_by" => "Contract is not active."]];
       }
 
@@ -180,6 +182,34 @@ class InPersonCollectionService extends BaseService {
               AppConstants::RUN_MODE === 'debug'
                 ? $e->getMessage()
                 : 'unexpected_error',
+        ],
+      ];
+    }
+  }
+
+  public function find_by_person(string $person_id): array {
+    try {
+      $contracts = $this->contract_repository->find_by_person_id($person_id);
+      $all = [];
+
+      foreach ($contracts as $contract) {
+        $collections = $this->repository->find_by_collected_by($contract->get_id());
+        foreach ($collections as $c) {
+          $all[] = $c;
+        }
+      }
+
+      return $all;
+    } catch (Exception $e) {
+      Logger::error('Error finding in-person collections by person', [
+        'person_id' => $person_id,
+        'error' => $e->getMessage(),
+      ]);
+      return [
+        'errors' => [
+          'server_error' => AppConstants::RUN_MODE === 'debug'
+            ? $e->getMessage()
+            : 'unexpected_error',
         ],
       ];
     }

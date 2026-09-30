@@ -11,6 +11,7 @@ use App\Repositories\PersonRepository;
 use App\Repositories\RoleRepository;
 use Core\Utils\AppConstants;
 use Core\Utils\Logger;
+use App\Core\Utils\NeutralValue;
 use DateTime;
 use Exception;
 
@@ -62,12 +63,15 @@ class ContractService extends BaseService {
 
       $last_rejection = $this->repository->find_last_rejection_for_person_and_role($person_id, $role_id);
       if ($last_rejection !== null) {
-        $responded_at = new DateTime($last_rejection->get_responded_at());
-        $now = new DateTime();
-        $diff = $now->diff($responded_at);
-        $months = ($diff->y * 12) + $diff->m;
-        if ($months < 3) {
-          return ["errors" => ["role_id" => "You must wait 3 months after a rejection before requesting again."]];
+        $responded_at_raw = $last_rejection->get_responded_at();
+        if (!($responded_at_raw instanceof NeutralValue)) {
+          $responded_at = new DateTime($responded_at_raw);
+          $now = new DateTime();
+          $diff = $now->diff($responded_at);
+          $months = ($diff->y * 12) + $diff->m;
+          if ($months < 3) {
+            return ["errors" => ["role_id" => "You must wait 3 months after a rejection before requesting again."]];
+          }
         }
       }
 
@@ -82,6 +86,25 @@ class ContractService extends BaseService {
       return $result;
     } catch (Exception $e) {
       Logger::error('Error creating contract', ['error' => $e->getMessage()]);
+      return [
+        'errors' => [
+          'server_error' =>
+            AppConstants::RUN_MODE === 'debug'
+              ? $e->getMessage()
+              : 'unexpected_error',
+        ],
+      ];
+    }
+  }
+
+  public function find_by_responded_by(string $admin_contract_id): array {
+    try {
+      return $this->repository->find_by_responded_by($admin_contract_id);
+    } catch (Exception $e) {
+      Logger::error('Error finding contracts by responded_by', [
+        'admin_contract_id' => $admin_contract_id,
+        'error' => $e->getMessage(),
+      ]);
       return [
         'errors' => [
           'server_error' =>
@@ -108,7 +131,7 @@ class ContractService extends BaseService {
       if ($admin_contract === null) {
         return ["errors" => ["approved_by_id" => "Contract not found."]];
       }
-      if ($admin_contract->get_status() !== 'approved' || $admin_contract->get_contract_end_at() !== null) {
+      if (!$admin_contract->is_active()) {
         return ["errors" => ["approved_by_id" => "Contract is not active."]];
       }
 
@@ -162,7 +185,7 @@ class ContractService extends BaseService {
       if ($admin_contract === null) {
         return ["errors" => ["rejected_by_id" => "Contract not found."]];
       }
-      if ($admin_contract->get_status() !== 'approved' || $admin_contract->get_contract_end_at() !== null) {
+      if (!$admin_contract->is_active()) {
         return ["errors" => ["rejected_by_id" => "Contract is not active."]];
       }
 
@@ -241,7 +264,7 @@ class ContractService extends BaseService {
         return ["errors" => ["not_found_error" => "Contract not found."]];
       }
 
-      if ($contract->get_status() !== 'approved' || $contract->get_contract_end_at() !== null) {
+      if (!$contract->is_active()) {
         return ["errors" => ["status" => "Only approved and not ended contracts can be terminated."]];
       }
 
@@ -249,7 +272,7 @@ class ContractService extends BaseService {
       if ($admin_contract === null) {
         return ["errors" => ["contract_end_by_id" => "Contract not found."]];
       }
-      if ($admin_contract->get_status() !== 'approved' || $admin_contract->get_contract_end_at() !== null) {
+      if (!$admin_contract->is_active()) {
         return ["errors" => ["contract_end_by_id" => "Contract is not active."]];
       }
 

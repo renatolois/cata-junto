@@ -51,4 +51,20 @@ abstract class BaseRepository {
       mt_rand(0, 0xffff)
     );
   }
+
+  public function begin_transaction(): bool {
+    return $this->db->begin_transaction();
+  }
+  
+  public function commit(): bool {
+    return $this->db->commit();
+  }
+  
+  public function rollback(): bool {
+    return $this->db->rollback();
+  }
+  
+  public function in_transaction(): bool {
+    return $this->db->in_transaction();
+  }
 }

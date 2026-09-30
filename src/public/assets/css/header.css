@@ -1,0 +1,46 @@
+@import url('colors.css');
+
+header {
+    color: var(--text-main);
+    padding: 10px 30px;
+    height: 90px;
+    position: sticky;
+    background-color: var(--bg-block);
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    border-bottom: 3px solid var(--border);
+    gap: 25px;
+}
+
+header .theme-btn {
+    right: 20px;
+    background-color: var(--primary);
+    color: var(--text-another);
+    border: 2px solid var(--border);
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+header .logo {
+    color: var(--text-main);
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+    text-decoration: none;
+}
+
+.logo:hover {
+    background-color: var(--bg-alternative);
+}

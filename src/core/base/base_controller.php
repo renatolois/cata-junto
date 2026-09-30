@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Core\Base;
 
+use Core\Utils\AppConstants;
+
 abstract class BaseController {
   protected BaseService $service;
   protected array $body = [];
@@ -13,7 +15,7 @@ abstract class BaseController {
     $this->service = $service;
     $this->query = $_GET;
     $input = file_get_contents('php://input');
-    
+
     if ($input) {
       $decoded = json_decode($input, true);
       if (json_last_error() === JSON_ERROR_NONE) {
@@ -25,6 +27,9 @@ abstract class BaseController {
   }
 
   public function set_route_params(array $params): void {
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("CTRL: set_route_params class=" . static::class . " params=" . json_encode($params));
+    }
     $this->route_params = $params;
   }
 
@@ -50,6 +55,9 @@ abstract class BaseController {
   }
 
   protected function json_response(array $data, int $status_code = 200): void {
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("CTRL: json_response class=" . static::class . " status={$status_code} data=" . json_encode($data));
+    }
     http_response_code($status_code);
     header('Content-Type: application/json');
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
@@ -57,6 +65,9 @@ abstract class BaseController {
   }
 
   protected function error_response(string $message, int $status_code = 400): void {
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("CTRL_ERR: class=" . static::class . " status={$status_code} message={$message}");
+    }
     $this->json_response(['error' => $message], $status_code);
   }
 
@@ -82,20 +93,32 @@ abstract class BaseController {
 
   protected function handle_error(array $errors): void {
     if (isset($errors['not_found_error'])) {
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("CTRL: handle_error not_found class=" . static::class);
+      }
       $this->json_response(['errors' => $errors], 404);
       return;
     }
 
     if (isset($errors['service_error'])) {
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("CTRL: handle_error service_error class=" . static::class);
+      }
       $this->json_response(['errors' => $errors], 500);
       return;
     }
 
     if (isset($errors['server_error'])) {
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("CTRL: handle_error server_error class=" . static::class);
+      }
       $this->json_response(['errors' => $errors], 500);
       return;
     }
 
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("CTRL: handle_error validation class=" . static::class . " errors=" . json_encode($errors));
+    }
     $this->json_response(['errors' => $errors], 422);
   }
 
@@ -111,7 +134,7 @@ abstract class BaseController {
       ], 404);
       return;
     }
-    
+
     if ($this->is_model_result($result)) {
       $this->json_response($result->to_array(), $success_code);
       return;
@@ -137,7 +160,7 @@ abstract class BaseController {
       $this->json_response($items, $success_code);
       return;
     }
-    
+
     $this->json_response(['errors' => ['server_error' => 'Unexpected type']], 500);
   }
 }

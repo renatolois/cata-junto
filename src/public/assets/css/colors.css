@@ -1,0 +1,33 @@
+:root {
+  --bg-main: #f2f3f0;
+  --bg-block: #ffffff;
+  --bg-alternative: #e1e1e7;
+  --bg-another: #242424;
+  --text-main: #09090b;
+  --text-alternative: #1d1d1d;
+  --text-another: #e9e9e9;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --border: #e4e4e7;
+  --border-alternative: rgb(182, 182, 182);
+  --shadow: 0 10.3px 30px -10px rgba(0, 0, 0, 0.04);
+  --a-color: #491cfa;
+  --a-color-hover: #653fff;
+}
+
+html.dark {
+  --bg-main: #09090b;
+  --bg-block: #313137;
+  --bg-alternative: #1a1a1a;
+  --bg-another: #f4f4f4;
+  --text-main: #fafafa;
+  --text-alternative: #a1a1aa;
+  --text-another: #050505;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --border: rgb(174, 174, 174);
+  --border-alternative: rgb(72, 72, 72);
+  --shadow: 0 10.3px 30px -10px rgba(0, 0, 0, 0.5);
+  --a-color: #8a70f1;
+  --a-color-hover: #653fff;
+}

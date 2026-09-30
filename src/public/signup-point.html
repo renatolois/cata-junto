@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="module" src="./assets/js/init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro — Local de Coleta</title>
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/header.css">
+    <link rel="stylesheet" href="./assets/css/form.css">
+</head>
+<body>
+    <header>
+        <a class="logo" href="/index.html">
+            <h1>Cata-Junto</h1>
+        </a>
+        <button class="theme-btn" id="theme-btn"><b>L/D</b></button>
+    </header>
+
+    <div class="form-container">
+        <h2>Cadastrar-se como Local de Coleta</h2>
+        <form id="form">
+            <span class="form-item">
+                <label for="email">Digite seu E-Mail:</label>
+                <input type="email" name="email" id="email-input" placeholder="Email" required autocomplete="email">
+            </span>
+            <hr>
+            <span class="form-item">
+                <label for="phone">Digite seu número de telefone:</label>
+                <input type="tel" name="phone" id="phone-input" placeholder="(11) 99999-9999" required autocomplete="tel">
+            </span>
+            <hr>
+            <span class="form-item">
+                <label for="street">Digite o nome da sua rua:</label>
+                <input type="text" name="street" id="street-input" placeholder="Rua" required>
+            </span>
+            <span class="form-item">
+                <label for="number">Digite o número do seu endereço:</label>
+                <input type="text" name="number" id="number-input" placeholder="Número" required>
+            </span>
+            <span class="form-item">
+                <label for="neighborhood">Digite o nome do seu bairro:</label>
+                <input type="text" name="neighborhood" id="neighborhood-input" placeholder="Bairro" required>
+            </span>
+            <span class="form-item">
+                <label for="complement">Digite o seu complemento:</label>
+                <input type="text" name="complement" id="complement-input" placeholder="Complemento (opcional)">
+            </span>
+            <span class="form-item">
+                <label for="city">Digite a sua cidade:</label>
+                <input type="text" name="city" id="city-input" placeholder="Cidade" required>
+            </span>
+            <span class="form-item">
+                <label for="state">Digite o seu estado:</label>
+                <input type="text" name="state" id="state-input" placeholder="UF" required maxlength="2">
+            </span>
+            <span class="form-item">
+                <label for="cep">Digite o seu CEP:</label>
+                <input type="text" name="cep" id="cep-input" placeholder="00000-000" required inputmode="numeric">
+            </span>
+            <hr>
+            <span class="form-item">
+                <label for="password">Digite sua senha:</label>
+                <input type="password" name="password" id="password-input" placeholder="Senha" required autocomplete="new-password">
+            </span>
+            <span class="form-item">
+                <label for="password-confirm">Digite sua senha de novo:</label>
+                <input type="password" name="password-confirm" id="password-confirm-input" placeholder="Confirme a senha" required autocomplete="new-password">
+            </span>
+            <hr>
+            <input type="submit" id="submit-button" value="Cadastrar">
+        </form>
+        <p id="form-feedback" role="alert" aria-live="polite"></p>
+        <hr>
+        <ul class="form-actions">
+            <li><a href="signin.html">Logar como Cooperado</a></li>
+            <li><a href="signin-point.html">Logar como Local de Coleta</a></li>
+        </ul>
+    </div>
+
+    <script type='module' src='assets/js/themeToggle.js'></script>
+
+    <script type="module">
+        const form = document.getElementById("form");
+        const emailInput = document.getElementById("email-input");
+        const phoneInput = document.getElementById("phone-input");
+        const streetInput = document.getElementById("street-input");
+        const numberInput = document.getElementById("number-input");
+        const neighborhoodInput = document.getElementById("neighborhood-input");
+        const complementInput = document.getElementById("complement-input");
+        const cityInput = document.getElementById("city-input");
+        const stateInput = document.getElementById("state-input");
+        const cepInput = document.getElementById("cep-input");
+        const passwordInput = document.getElementById("password-input");
+        const passwordConfirmInput = document.getElementById("password-confirm-input");
+        const submitButton = document.getElementById("submit-button");
+        const feedback = document.getElementById("form-feedback");
+
+        function set_feedback(message, kind) {
+            feedback.textContent = message;
+            feedback.dataset.kind = kind || "";
+        }
+
+        function set_loading(is_loading) {
+            submitButton.disabled = is_loading;
+            submitButton.value = is_loading ? "Cadastrando..." : "Cadastrar";
+        }
+
+        phoneInput.addEventListener("input", () => {
+            phoneInput.value = phoneInput.value.replace(/\D/g, "").slice(0, 11);
+        });
+
+        cepInput.addEventListener("input", () => {
+            cepInput.value = cepInput.value.replace(/\D/g, "").slice(0, 8);
+        });
+
+        stateInput.addEventListener("input", () => {
+            stateInput.value = stateInput.value.toUpperCase().slice(0, 2);
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            set_feedback("", "");
+
+            const email = emailInput.value.trim();
+            const phone = phoneInput.value.replace(/\D/g, "");
+            const street = streetInput.value.trim();
+            const number = numberInput.value.trim();
+            const neighborhood = neighborhoodInput.value.trim();
+            const complement = complementInput.value.trim();
+            const city = cityInput.value.trim();
+            const state = stateInput.value.trim().toUpperCase();
+            const cep = cepInput.value.replace(/\D/g, "");
+            const password = passwordInput.value;
+            const password_confirm = passwordConfirmInput.value;
+
+            if (!email || !phone || !street || !number || !neighborhood || !city || !state || !cep || !password) {
+                set_feedback("Preencha todos os campos obrigatórios.", "error");
+                return;
+            }
+
+            if (password !== password_confirm) {
+                set_feedback("As senhas não coincidem.", "error");
+                return;
+            }
+
+            if (cep.length !== 8) {
+                set_feedback("CEP deve ter 8 dígitos.", "error");
+                return;
+            }
+
+            set_loading(true);
+
+            try {
+                const response = await fetch("/collection-location", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        responsable_email: email,
+                        responsable_phone_number: phone,
+                        street,
+                        number,
+                        neighborhood,
+                        complement,
+                        city,
+                        state,
+                        cep,
+                        password,
+                    }),
+                });
+
+                let payload = null;
+                try { payload = await response.json(); } catch (_) {}
+
+                if (!response.ok) {
+                    if (payload?.errors) {
+                        const first = Object.values(payload.errors)[0];
+                        set_feedback(String(first), "error");
+                        return;
+                    }
+                    const friendly = {
+                        400: "Preencha os campos corretamente.",
+                        422: "Alguns dados estão inválidos.",
+                        500: "Erro no servidor. Tente novamente.",
+                    };
+                    set_feedback(
+                        friendly[response.status] || payload?.error || "Falha no cadastro.",
+                        "error"
+                    );
+                    return;
+                }
+
+                set_feedback("Cadastro realizado! Redirecionando...", "success");
+                setTimeout(() => {
+                    window.location.href = "/signin-point.html";
+                }, 1200);
+
+            } catch (err) {
+                console.error("signup-point error:", err);
+                set_feedback("Não foi possível conectar ao servidor.", "error");
+            } finally {
+                set_loading(false);
+            }
+        });
+    </script>
+</body>
+</html>

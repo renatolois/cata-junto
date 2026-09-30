@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="module" src="./assets/js/init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedir Vínculo — Cata-Junto</title>
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/header.css">
+    <link rel="stylesheet" href="./assets/css/form.css">
+</head>
+<body>
+    <header>
+        <a class="logo" href="/index.html">
+            <h1>Cata-Junto</h1>
+        </a>
+        <button class="theme-btn" id="theme-btn"><b>L/D</b></button>
+    </header>
+
+    <div class="form-container">
+        <h2>Pedir Vínculo</h2>
+        <form id="form">
+            <span class="form-item">
+                <label for="role">Escolha o tipo de vínculo:</label>
+                <select name="role" id="role-input" required>
+                    <option value="">-- selecione --</option>
+                    <option value="2">Cooperado</option>
+                    <option value="1">Administrador</option>
+                </select>
+            </span>
+            <hr>
+            <input type="submit" id="submit-button" value="Enviar Pedido">
+        </form>
+        <p id="form-feedback" role="alert" aria-live="polite"></p>
+        <hr>
+        <ul class="form-actions">
+            <li><a href="person-page.html">Voltar ao Perfil</a></li>
+        </ul>
+    </div>
+
+    <script type='module' src='assets/js/themeToggle.js'></script>
+
+    <script type="module">
+        const form = document.getElementById("form");
+        const roleInput = document.getElementById("role-input");
+        const submitButton = document.getElementById("submit-button");
+        const feedback = document.getElementById("form-feedback");
+
+        function set_feedback(message, kind) {
+            feedback.textContent = message;
+            feedback.dataset.kind = kind || "";
+        }
+
+        function set_loading(is_loading) {
+            submitButton.disabled = is_loading;
+            submitButton.value = is_loading ? "Enviando..." : "Enviar Pedido";
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            set_feedback("", "");
+
+            const role_id = parseInt(roleInput.value, 10);
+            if (!role_id) {
+                set_feedback("Escolha um tipo de vínculo.", "error");
+                return;
+            }
+
+            set_loading(true);
+
+            try {
+                const response = await fetch("/contract", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ role_id }),
+                });
+
+                let payload = null;
+                try { payload = await response.json(); } catch (_) {}
+
+                if (!response.ok) {
+                    if (payload?.errors) {
+                        const first = Object.values(payload.errors)[0];
+                        set_feedback(String(first), "error");
+                        return;
+                    }
+                    set_feedback(payload?.error || "Falha ao pedir vínculo.", "error");
+                    return;
+                }
+
+                set_feedback("Pedido enviado! Aguardando aprovação.", "success");
+                setTimeout(() => {
+                    window.location.href = "/person-page.html";
+                }, 1500);
+
+            } catch (err) {
+                console.error("contract request error:", err);
+                set_feedback("Não foi possível conectar ao servidor.", "error");
+            } finally {
+                set_loading(false);
+            }
+        });
+    </script>
+</body>
+</html>

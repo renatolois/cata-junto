@@ -73,6 +73,7 @@ require __DIR__ . '/services/in_person_collection_service.php';
 require __DIR__ . '/middlewares/auth_middleware.php';
 require __DIR__ . '/middlewares/authorization_middleware.php';
 require __DIR__ . '/middlewares/collection_location_only_middleware.php';
+require __DIR__ . '/middlewares/person_only_middleware.php';
 
 // controllers
 require __DIR__ . '/controllers/auth_controller.php';
@@ -112,6 +113,7 @@ use App\Validators\ResidentialCollectionValidator;
 use App\Validators\MaterialTypeValidator;
 use App\Validators\PrizeTypeValidator;
 use App\Validators\PrizeClaimValidator;
+use App\Validators\RoleValidator;
 
 use App\Services\PersonService;
 use App\Services\CollectionLocationService;
@@ -121,6 +123,7 @@ use App\Services\ResidentialCollectionService;
 use App\Services\MaterialTypeService;
 use App\Services\PrizeTypeService;
 use App\Services\PrizeClaimService;
+use App\Services\RoleService;
 
 use App\Controllers\AuthController;
 use App\Controllers\PersonController;
@@ -131,10 +134,12 @@ use App\Controllers\ResidentialCollectionController;
 use App\Controllers\MaterialTypeController;
 use App\Controllers\PrizeTypeController;
 use App\Controllers\PrizeClaimController;
+use App\Controllers\RoleController;
 
 use App\Middlewares\AuthMiddleware;
 use App\Middlewares\AuthorizationMiddleware;
 use App\Middlewares\CollectionLocationOnlyMiddleware;
+use App\Middlewares\PersonOnlyMiddleware;
 
 use App\Routers\AuthRouter;
 use App\Routers\PersonRouter;
@@ -163,6 +168,7 @@ $residential_collection_validator = new ResidentialCollectionValidator();
 $material_type_validator          = new MaterialTypeValidator();
 $prize_type_validator             = new PrizeTypeValidator();
 $prize_claim_validator            = new PrizeClaimValidator();
+$role_validator                   = new RoleValidator();
 
 $person_service                 = new PersonService($person_repo, $person_validator);
 $collection_location_service    = new CollectionLocationService($collection_location_repo, $collection_location_validator);
@@ -172,6 +178,7 @@ $residential_collection_service = new ResidentialCollectionService($residential_
 $material_type_service          = new MaterialTypeService($material_type_repo, $material_type_validator);
 $prize_type_service             = new PrizeTypeService($prize_type_repo, $prize_type_validator);
 $prize_claim_service            = new PrizeClaimService($prize_claim_repo, $prize_claim_validator, $collection_location_repo, $prize_type_repo);
+$role_service                   = new RoleService($role_repo, $role_validator);
 
 $auth_controller                   = new AuthController($person_service, $collection_location_service, $person_service);
 $person_controller                 = new PersonController($person_service);
@@ -182,6 +189,7 @@ $residential_collection_controller = new ResidentialCollectionController($reside
 $material_type_controller          = new MaterialTypeController($material_type_service);
 $prize_type_controller             = new PrizeTypeController($prize_type_service);
 $prize_claim_controller            = new PrizeClaimController($prize_claim_service);
+$role_controller                   = new RoleController($role_service);
 
 $controllers = [
     'AuthController'                  => $auth_controller,
@@ -193,13 +201,15 @@ $controllers = [
     'MaterialTypeController'          => $material_type_controller,
     'PrizeTypeController'             => $prize_type_controller,
     'PrizeClaimController'            => $prize_claim_controller,
+    'RoleController'                  => $role_controller,
 ];
 
 $auth_middleware    = new AuthMiddleware($person_repo, $collection_location_repo);
 $admin_only         = new AuthorizationMiddleware($contract_repo, $role_repo, ['admin']);
-$admin_or_member    = new AuthorizationMiddleware($contract_repo, $role_repo, ['admin', 'cooperado']);
-$admin_or_deliverer = new AuthorizationMiddleware($contract_repo, $role_repo, ['admin', 'cooperado']);
+$admin_or_member    = new AuthorizationMiddleware($contract_repo, $role_repo, ['admin', 'member']);
+$admin_or_deliverer = new AuthorizationMiddleware($contract_repo, $role_repo, ['admin', 'member']);
 $location_only      = new CollectionLocationOnlyMiddleware();
+$person_only        = new PersonOnlyMiddleware();
 
 $auth_router                = new AuthRouter($controllers);
 $person_router              = new PersonRouter($controllers);
@@ -211,12 +221,13 @@ $person_router->register_routes(
     $auth_middleware,
     $admin_only,
     $admin_or_member,
-    $admin_or_deliverer
+    $person_only
 );
 
 $collection_location_router->register_routes(
     $auth_middleware,
-    $location_only
+    $location_only,
+    $admin_only
 );
 
 $routers = [

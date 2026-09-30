@@ -166,7 +166,7 @@ class MaterialTypeService extends BaseService {
     }
   }
 
-  public function activate_weight(int $pk): bool|array {
+  public function activate_weight(int $pk): bool|array|MaterialTypeModel {
     try {
       $materialType = $this->repository->find_by_id($pk);
       if ($materialType === null) {
@@ -193,7 +193,7 @@ class MaterialTypeService extends BaseService {
     }
   }
 
-  public function deactivate_weight(int $pk): bool|array {
+  public function deactivate_weight(int $pk): bool|array|MaterialTypeModel {
     try {
       $materialType = $this->repository->find_by_id($pk);
       if ($materialType === null) {
@@ -220,7 +220,7 @@ class MaterialTypeService extends BaseService {
     }
   }
 
-  public function activate_unit(int $pk): bool|array {
+  public function activate_unit(int $pk): bool|array|MaterialTypeModel {
     try {
       $materialType = $this->repository->find_by_id($pk);
       if ($materialType === null) {
@@ -247,7 +247,7 @@ class MaterialTypeService extends BaseService {
     }
   }
 
-  public function deactivate_unit(int $pk): bool|array {
+  public function deactivate_unit(int $pk): bool|array|MaterialTypeModel {
     try {
       $materialType = $this->repository->find_by_id($pk);
       if ($materialType === null) {

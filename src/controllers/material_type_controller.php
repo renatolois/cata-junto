@@ -20,7 +20,7 @@ class MaterialTypeController extends BaseController {
   public function list(): void {
     $active = $this->get_query('active');
     $name = $this->get_query('name');
-    $id = $this->get_query('id');
+    $id = $this->get_route('id') ?? $this->get_query('id');
 
     $filters = array_filter([$active, $name, $id], fn($v) => $v !== null);
     if (count($filters) > 1) {

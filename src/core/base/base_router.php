@@ -5,6 +5,7 @@ namespace Core\Base;
 
 use ReflectionMethod;
 use Throwable;
+use Core\Utils\AppConstants;
 
 abstract class BaseRouter {
   protected array $routes = [];
@@ -55,25 +56,47 @@ abstract class BaseRouter {
     ];
   }
 
-protected function call(string $action, array $params = [], array $middlewares = [], bool $inject_auth_id = false): void {
+  protected function call(string $action, array $params = [], array $middlewares = [], bool $inject_auth_id = false): void {
+    if (AppConstants::RUN_MODE === 'debug') {
+      $middleware_classes = array_map(fn($m) => get_class($m), $middlewares);
+      error_log("ROUTER: call action={$action} middlewares=[" . implode(',', $middleware_classes) . "] inject_auth_id=" . ($inject_auth_id ? 'true' : 'false'));
+    }
+
     $context = ['params' => $params, 'auth' => null];
 
     foreach ($middlewares as $middleware) {
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("ROUTER: running middleware " . get_class($middleware));
+      }
+
       try {
         $result = $middleware->handle($context);
       } catch (Throwable $e) {
+        if (AppConstants::RUN_MODE === 'debug') {
+          error_log("ROUTER: middleware " . get_class($middleware) . " threw: " . $e->getMessage());
+        }
         $this->json_error('Internal server error', 500);
         return;
       }
 
       if (!is_array($result) || !isset($result['ok'])) {
+        if (AppConstants::RUN_MODE === 'debug') {
+          error_log("ROUTER: middleware " . get_class($middleware) . " returned invalid result: " . json_encode($result));
+        }
         $this->json_error('Middleware returned invalid result', 500);
         return;
       }
 
       if (!$result['ok']) {
+        if (AppConstants::RUN_MODE === 'debug') {
+          error_log("ROUTER: middleware " . get_class($middleware) . " rejected with status=" . ($result['status'] ?? 403) . " error=" . ($result['error'] ?? 'Forbidden'));
+        }
         $this->json_error($result['error'] ?? 'Forbidden', $result['status'] ?? 403);
         return;
+      }
+
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("ROUTER: middleware " . get_class($middleware) . " passed");
       }
 
       $context = $result['context'] ?? $context;
@@ -103,6 +126,10 @@ protected function call(string $action, array $params = [], array $middlewares =
       }
     }
 
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("ROUTER: final params=" . json_encode($params));
+    }
+
     [$controller_name, $method] = explode('@', $action, 2);
 
     $instance = $this->controllers[$controller_name] ?? null;
@@ -126,11 +153,18 @@ protected function call(string $action, array $params = [], array $middlewares =
       $instance->set_route_params($params);
     }
 
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("ROUTER: invoking {$controller_name}::{$method}");
+    }
+
     try {
       $instance->$method();
     } catch (Throwable $e) {
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("ROUTER: controller threw: " . $e->getMessage());
+      }
       $this->json_error(
-        \Core\Utils\AppConstants::RUN_MODE === 'debug' ? $e->getMessage() : 'Internal server error',
+        AppConstants::RUN_MODE === 'debug' ? $e->getMessage() : 'Internal server error',
         500
       );
     }
@@ -138,6 +172,10 @@ protected function call(string $action, array $params = [], array $middlewares =
 
   public function dispatch(string $method, string $uri): bool {
     $method = strtoupper($method);
+
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("ROUTER: dispatch class=" . static::class . " method={$method} uri={$uri}");
+    }
 
     if (!preg_match('/^[A-Z]+$/', $method)) {
       $this->json_error('Invalid method', 400);
@@ -160,6 +198,9 @@ protected function call(string $action, array $params = [], array $middlewares =
 
     foreach ($this->routes[$method] as $route) {
       if (preg_match($route['regex'], $uri_route, $matches)) {
+        if (AppConstants::RUN_MODE === 'debug') {
+          error_log("ROUTER: matched route={$route['route']} action={$route['action']}");
+        }
         $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
         $this->call($route['action'], $params, $route['middlewares'], $route['inject_auth_id']);
         return true;
@@ -201,6 +242,9 @@ protected function call(string $action, array $params = [], array $middlewares =
   }
 
   private function json_error(string $message, int $status_code): void {
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("ROUTER_ERR: status={$status_code} message={$message}");
+    }
     http_response_code($status_code);
     header('Content-Type: application/json');
     echo json_encode(['error' => $message], JSON_UNESCAPED_UNICODE);

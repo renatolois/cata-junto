@@ -21,7 +21,7 @@ class CollectionLocationController extends BaseController {
   public function list(): void {
     $active = $this->get_query('active');
     $email = $this->get_query('email');
-    $id = $this->get_query('id');
+    $id = $this->get_route('id') ?? $this->get_query('id');;
     $cep = $this->get_query('cep');
 
     $filters = array_filter([$active, $email, $id, $cep], fn($v) => $v !== null);

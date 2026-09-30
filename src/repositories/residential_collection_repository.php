@@ -46,6 +46,11 @@ class ResidentialCollectionRepository extends BaseRepository {
     return array_map([$this, 'hydrate'], $result);
   }
 
+  public function find_by_collected_by(string $contract_id): array {
+    $result = $this->db->select($this->table, ['collected_by' => $contract_id]);
+    return array_map([$this, 'hydrate'], $result);
+  }
+
   public function create_residential_collection(array $data): ResidentialCollectionModel {
     if (empty($data['id'])) {
       $data['id'] = $this->generate_uuid();

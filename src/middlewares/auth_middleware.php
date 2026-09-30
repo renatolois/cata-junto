@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Middlewares;
 
 use Core\Base\BaseMiddleware;
+use Core\Utils\AppConstants;
 use Core\Utils\EnvLoader;
 use App\Repositories\PersonRepository;
 use App\Repositories\CollectionLocationRepository;
@@ -25,43 +26,60 @@ class AuthMiddleware extends BaseMiddleware {
   public function handle(array $context): array {
     $token = $this->extract_token();
 
-    error_log("AUTH: token=" . ($token ? substr($token, 0, 40) . '...' : 'NULL'));
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("AUTH: token=" . ($token ? substr($token, 0, 40) . '...' : 'NULL'));
+    }
 
     if ($token === null) {
-      error_log("AUTH: token is NULL, rejecting");
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("AUTH: token is NULL, rejecting");
+      }
       return ['ok' => false, 'status' => 401, 'error' => 'Unauthorized'];
     }
 
     $secret = EnvLoader::get('jwt_secret');
-    error_log("AUTH: secret=" . ($secret ?? 'NULL'));
 
     if ($secret === null) {
-      error_log("AUTH: secret is NULL, server misconfiguration");
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("AUTH: secret is NULL, server misconfiguration");
+      }
       return ['ok' => false, 'status' => 500, 'error' => 'Server misconfiguration'];
     }
 
     try {
       $payload = static::decode_jwt($token, $secret);
-      error_log("AUTH: payload=" . json_encode($payload));
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("AUTH: payload=" . json_encode($payload));
+      }
     } catch (Exception $e) {
-      error_log("AUTH: decode failed: " . $e->getMessage());
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("AUTH: decode failed: " . $e->getMessage());
+      }
       return ['ok' => false, 'status' => 401, 'error' => 'Unauthorized'];
     }
 
     if (isset($payload['person_id'])) {
-      error_log("AUTH: looking up person_id=" . $payload['person_id']);
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("AUTH: looking up person_id=" . $payload['person_id']);
+      }
 
       $person = $this->person_repository->find_by_id($payload['person_id']);
       if ($person === null) {
-        error_log("AUTH: person not found");
+        if (AppConstants::RUN_MODE === 'debug') {
+          error_log("AUTH: person not found");
+        }
         return ['ok' => false, 'status' => 401, 'error' => 'Unauthorized'];
       }
       if (!$person->is_active()) {
-        error_log("AUTH: person is not active");
+        if (AppConstants::RUN_MODE === 'debug') {
+          error_log("AUTH: person is not active");
+        }
         return ['ok' => false, 'status' => 401, 'error' => 'Unauthorized'];
       }
 
-      error_log("AUTH: authenticated as person " . $person->get_id());
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("AUTH: authenticated as person " . $person->get_id());
+      }
 
       $context['auth'] = [
         'type'      => 'person',
@@ -72,19 +90,27 @@ class AuthMiddleware extends BaseMiddleware {
     }
 
     if (isset($payload['collection_location_id'])) {
-      error_log("AUTH: looking up collection_location_id=" . $payload['collection_location_id']);
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("AUTH: looking up collection_location_id=" . $payload['collection_location_id']);
+      }
 
       $location = $this->location_repository->find_by_id($payload['collection_location_id']);
       if ($location === null) {
-        error_log("AUTH: location not found");
+        if (AppConstants::RUN_MODE === 'debug') {
+          error_log("AUTH: location not found");
+        }
         return ['ok' => false, 'status' => 401, 'error' => 'Unauthorized'];
       }
       if (!$location->is_active()) {
-        error_log("AUTH: location is not active");
+        if (AppConstants::RUN_MODE === 'debug') {
+          error_log("AUTH: location is not active");
+        }
         return ['ok' => false, 'status' => 401, 'error' => 'Unauthorized'];
       }
 
-      error_log("AUTH: authenticated as location " . $location->get_id());
+      if (AppConstants::RUN_MODE === 'debug') {
+        error_log("AUTH: authenticated as location " . $location->get_id());
+      }
 
       $context['auth'] = [
         'type'                   => 'collection_location',
@@ -94,12 +120,16 @@ class AuthMiddleware extends BaseMiddleware {
       return ['ok' => true, 'context' => $context];
     }
 
-    error_log("AUTH: payload has neither person_id nor collection_location_id");
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("AUTH: payload has neither person_id nor collection_location_id");
+    }
     return ['ok' => false, 'status' => 401, 'error' => 'Unauthorized'];
   }
 
   private function extract_token(): ?string {
-    error_log("AUTH: \$_COOKIE keys = " . implode(', ', array_keys($_COOKIE)));
+    if (AppConstants::RUN_MODE === 'debug') {
+      error_log("AUTH: \$_COOKIE keys = " . implode(', ', array_keys($_COOKIE)));
+    }
 
     $token = $_COOKIE['token'] ?? null;
     if ($token === null || $token === '') {

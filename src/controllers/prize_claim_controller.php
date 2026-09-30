@@ -48,9 +48,17 @@ class PrizeClaimController extends BaseController {
   public function create(): void {
     $data = $this->get_body();
     if (empty($data)) {
-      $this->error_response('Data not provided', 400);
-      return;
+        $this->error_response('Data not provided', 400);
+        return;
     }
+
+    $location_id = $this->get_route('auth_location_id');
+    if (!$location_id) {
+        $this->error_response('Unauthorized', 401);
+        return;
+    }
+
+    $data['claimed_by'] = $location_id;
 
     $result = $this->service->create($data);
     $this->handle_result($result, 201);

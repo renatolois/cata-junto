@@ -163,4 +163,16 @@ class ContractModel extends BaseModel {
     $this->responded_at = date('Y-m-d H:i:s');
     $this->status = 'cancelled';
   }
+
+  public function is_active(): bool {
+    return $this->status === 'approved' && $this->contract_end_at instanceof NeutralValue;
+  }
+
+  public function has_response(): bool {
+    return !($this->responded_at instanceof NeutralValue);
+  }
+
+  public function has_ended(): bool {
+    return !($this->contract_end_at instanceof NeutralValue);
+  }
 }

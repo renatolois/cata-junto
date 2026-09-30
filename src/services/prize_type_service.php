@@ -166,7 +166,7 @@ class PrizeTypeService extends BaseService {
     }
   }
 
-  public function activate(int $pk): bool|array {
+  public function activate(int $pk): bool|array|PrizeTypeModel {
     try {
       $prizeType = $this->repository->find_by_id($pk);
       if ($prizeType === null) {
@@ -193,7 +193,7 @@ class PrizeTypeService extends BaseService {
     }
   }
 
-  public function deactivate(int $pk): bool|array {
+  public function deactivate(int $pk): bool|array|PrizeTypeModel {
     try {
       $prizeType = $this->repository->find_by_id($pk);
       if ($prizeType === null) {

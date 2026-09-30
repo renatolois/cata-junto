@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="module" src="./assets/js/init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro — Cata-Junto</title>
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/header.css">
+    <link rel="stylesheet" href="./assets/css/form.css">
+</head>
+<body>
+    <header>
+        <a class="logo" href="/index.html">
+            <h1>Cata-Junto</h1>
+        </a>
+        <button class="theme-btn" id="theme-btn"><b>L/D</b></button>
+    </header>
+
+    <div class="form-container">
+        <h2>Cadastrar-se como Cooperado</h2>
+        <form id="form">
+            <span class="form-item">
+                <label for="name">Digite seu nome completo:</label>
+                <input type="text" name="name" id="name-input" placeholder="Nome" required autocomplete="name">
+            </span>
+            <hr>
+            <span class="form-item">
+                <label for="email">Digite seu E-Mail:</label>
+                <input type="email" name="email" id="email-input" placeholder="Email" required autocomplete="email">
+            </span>
+            <hr>
+            <span class="form-item">
+                <label for="phone">Digite seu número de telefone:</label>
+                <input type="tel" name="phone" id="phone-input" placeholder="(11) 99999-9999" required autocomplete="tel">
+            </span>
+            <hr>
+            <span class="form-item">
+                <label for="cpf">Digite seu CPF:</label>
+                <input type="text" name="cpf" id="cpf-input" placeholder="000.000.000-00" required inputmode="numeric">
+            </span>
+            <hr>
+            <span class="form-item">
+                <label for="born-date">Digite sua data de nascimento:</label>
+                <input type="date" name="born-date" id="born-date-input" required>
+            </span>
+            <hr>
+            <span class="form-item">
+                <label for="password">Digite sua senha:</label>
+                <input type="password" name="password" id="password-input" placeholder="Senha" required autocomplete="new-password">
+            </span>
+            <span class="form-item">
+                <label for="password-confirm">Digite sua senha de novo:</label>
+                <input type="password" name="password-confirm" id="password-confirm-input" placeholder="Confirme a senha" required autocomplete="new-password">
+            </span>
+            <hr>
+            <input type="submit" id="submit-button" value="Cadastrar">
+        </form>
+        <p id="form-feedback" role="alert" aria-live="polite"></p>
+        <hr>
+        <ul class="form-actions">
+            <li><a href="signin.html">Logar como Cooperado</a></li>
+            <li><a href="signin-point.html">Logar como Local de Coleta</a></li>
+        </ul>
+    </div>
+
+    <script type='module' src='assets/js/themeToggle.js'></script>
+
+    <script type="module">
+        const form = document.getElementById("form");
+        const nameInput = document.getElementById("name-input");
+        const emailInput = document.getElementById("email-input");
+        const phoneInput = document.getElementById("phone-input");
+        const cpfInput = document.getElementById("cpf-input");
+        const bornDateInput = document.getElementById("born-date-input");
+        const passwordInput = document.getElementById("password-input");
+        const passwordConfirmInput = document.getElementById("password-confirm-input");
+        const submitButton = document.getElementById("submit-button");
+        const feedback = document.getElementById("form-feedback");
+
+        function set_feedback(message, kind) {
+            feedback.textContent = message;
+            feedback.dataset.kind = kind || "";
+        }
+
+        function set_loading(is_loading) {
+            submitButton.disabled = is_loading;
+            submitButton.value = is_loading ? "Cadastrando..." : "Cadastrar";
+        }
+
+        cpfInput.addEventListener("input", () => {
+            cpfInput.value = cpfInput.value.replace(/\D/g, "").slice(0, 11);
+        });
+
+        phoneInput.addEventListener("input", () => {
+            phoneInput.value = phoneInput.value.replace(/\D/g, "").slice(0, 11);
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            set_feedback("", "");
+
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const phone = phoneInput.value.replace(/\D/g, "");
+            const cpf = cpfInput.value.replace(/\D/g, "");
+            const birth_date = bornDateInput.value;
+            const password = passwordInput.value;
+            const password_confirm = passwordConfirmInput.value;
+
+            if (!name || !email || !phone || !cpf || !birth_date || !password) {
+                set_feedback("Preencha todos os campos.", "error");
+                return;
+            }
+
+            if (password !== password_confirm) {
+                set_feedback("As senhas não coincidem.", "error");
+                return;
+            }
+
+            if (cpf.length !== 11) {
+                set_feedback("CPF deve ter 11 dígitos.", "error");
+                return;
+            }
+
+            set_loading(true);
+
+            try {
+                const response = await fetch("/person", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        phone_number: phone,
+                        cpf,
+                        birth_date,
+                        password,
+                    }),
+                });
+
+                let payload = null;
+                try { payload = await response.json(); } catch (_) {}
+
+                if (!response.ok) {
+                    if (payload?.errors) {
+                        const first = Object.values(payload.errors)[0];
+                        set_feedback(String(first), "error");
+                        return;
+                    }
+
+                    const friendly = {
+                        400: "Preencha os campos corretamente.",
+                        422: "Alguns dados estão inválidos.",
+                        500: "Erro no servidor. Tente novamente.",
+                    };
+                    set_feedback(
+                        friendly[response.status] || payload?.error || "Falha no cadastro.",
+                        "error"
+                    );
+                    return;
+                }
+
+                set_feedback("Cadastro realizado! Redirecionando...", "success");
+
+                setTimeout(() => {
+                    window.location.href = "/signin.html";
+                }, 1200);
+
+            } catch (err) {
+                console.error("signup error:", err);
+                set_feedback("Não foi possível conectar ao servidor.", "error");
+            } finally {
+                set_loading(false);
+            }
+        });
+    </script>
+</body>
+</html>

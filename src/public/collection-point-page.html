@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="module" src="./assets/js/init.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil — Local de Coleta</title>
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/header.css">
+    <link rel="stylesheet" href="./assets/css/profile-page.css">
+    <link rel="stylesheet" href="./assets/css/form.css">
+</head>
+<body>
+    <header>
+        <a class="logo" href="/index.html">
+            <h1>Cata-Junto</h1>
+        </a>
+        <button class="theme-btn" id="theme-btn"><b>L/D</b></button>
+    </header>
+
+    <div class="profile-content">
+        <h1>Meu Ponto de Coleta</h1>
+
+        <ul>
+            <li id="email">
+                <b>email:</b>
+                <p id="email-buffer"></p>
+            </li>
+            <li id="phone">
+                <b>phone:</b>
+                <p id="phone-buffer"></p>
+            </li>
+            <li id="address">
+                <b>endereço:</b>
+                <p id="address-buffer"></p>
+            </li>
+            <li id="points">
+                <b>pontos:</b>
+                <p id="points-buffer"></p>
+            </li>
+        </ul>
+
+        <section class="contract-section" id="section-prizes">
+            <h2>Prêmios Disponíveis</h2>
+            <ul class="contract-list" id="prizes-catalog-list"></ul>
+        </section>
+
+        <section class="contract-section" id="section-claims-pending">
+            <h2>Reivindicações Pendentes</h2>
+            <ul class="contract-list" id="claims-pending-list"></ul>
+        </section>
+
+        <section class="contract-section" id="section-claims-completed">
+            <h2>Reivindicações Concluídas</h2>
+            <ul class="contract-list" id="claims-completed-list"></ul>
+        </section>
+
+        <section class="contract-section" id="section-claims-rejected">
+            <h2>Reivindicações Recusadas</h2>
+            <ul class="contract-list" id="claims-rejected-list"></ul>
+        </section>
+
+        <section class="contract-section" id="section-claims-cancelled">
+            <h2>Reivindicações Canceladas</h2>
+            <ul class="contract-list" id="claims-cancelled-list"></ul>
+        </section>
+
+        <section class="contract-section" id="section-residential">
+            <h2>Coletas Residenciais</h2>
+            <div class="profile-actions">
+                <button type="button" id="new-residential-btn" class="btn-primary">Pedir Nova Coleta</button>
+            </div>
+
+            <h3>Pendentes</h3>
+            <ul class="contract-list" id="residential-pending-list"></ul>
+
+            <h3>Concluídas</h3>
+            <ul class="contract-list" id="residential-completed-list"></ul>
+
+            <h3>Rejeitadas</h3>
+            <ul class="contract-list" id="residential-rejected-list"></ul>
+
+            <h3>Canceladas</h3>
+            <ul class="contract-list" id="residential-cancelled-list"></ul>
+        </section>
+    </div>
+
+    <div class="modal-overlay" id="claim-modal" hidden>
+        <div class="modal">
+            <h2>Resgatar Prêmio</h2>
+            <ul class="review-details">
+                <li><b>Prêmio:</b> <span id="claim-prize-name"></span></li>
+                <li><b>Descrição:</b> <span id="claim-prize-description"></span></li>
+                <li><b>Custo:</b> <span id="claim-prize-cost"></span> pontos</li>
+                <li><b>Seus pontos:</b> <span id="claim-current-points"></span></li>
+            </ul>
+            <form id="claim-form">
+                <hr>
+                <div class="modal-actions">
+                    <button type="button" id="claim-cancel" class="btn-secondary">Cancelar</button>
+                    <button type="submit" id="claim-confirm" class="btn-primary">Resgatar</button>
+                </div>
+            </form>
+            <p id="claim-feedback" role="alert" aria-live="polite"></p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="residential-modal" hidden>
+        <div class="modal">
+            <h2>Pedir Coleta Residencial</h2>
+            <form id="residential-form">
+                <span class="form-item">
+                    <label for="res-material">Tipo de material:</label>
+                    <select id="res-material" name="material_type_id" required>
+                        <option value="">-- selecione --</option>
+                    </select>
+                </span>
+                <span class="form-item">
+                    <label for="res-collect-type">Tipo de coleta:</label>
+                    <select id="res-collect-type" name="collect_type" required>
+                        <option value="">-- selecione --</option>
+                        <option value="weight">Por peso</option>
+                        <option value="unit">Por unidade</option>
+                    </select>
+                </span>
+                <span class="form-item">
+                    <label for="res-description">Descrição:</label>
+                    <textarea id="res-description" name="description" rows="4" maxlength="500"></textarea>
+                </span>
+                <hr>
+                <div class="modal-actions">
+                    <button type="button" id="res-cancel" class="btn-secondary">Cancelar</button>
+                    <button type="submit" id="res-confirm" class="btn-primary">Enviar Pedido</button>
+                </div>
+            </form>
+            <p id="res-feedback" role="alert" aria-live="polite"></p>
+        </div>
+    </div>
+
+    <script type='module' src='assets/js/themeToggle.js'></script>
+
+    <script type="module">
+        const STATUS_LABELS = {
+            pending: "pendente",
+            approved: "aprovado",
+            rejected: "recusado",
+            cancelled: "cancelado",
+            completed: "concluída",
+            concluded: "concluída",
+            dismissed: "encerrado",
+        };
+
+        const STATUS_CLASS = {
+            pending: "status-pending",
+            approved: "status-approved",
+            rejected: "status-rejected",
+            cancelled: "status-cancelled",
+            completed: "status-approved",
+            concluded: "status-approved",
+            dismissed: "status-dismissed",
+        };
+
+        let CURRENT_LOCATION = null;
+        let PRIZES = [];
+        let MATERIALS = [];
+        let claim_prize_id = null;
+
+        function set_text(id, value) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value ?? "";
+        }
+
+        function format_date(value) {
+            if (!value) return "";
+            const d = new Date(value);
+            if (isNaN(d.getTime())) return value;
+            return d.toLocaleDateString("pt-BR");
+        }
+
+        function render_empty(list_id, message) {
+            const ul = document.getElementById(list_id);
+            if (!ul) return;
+            ul.innerHTML = "";
+            const li = document.createElement("li");
+            li.className = "contract-empty";
+            li.textContent = message || "Nenhum registro.";
+            ul.appendChild(li);
+        }
+
+        async function load_location() {
+            const me = await fetch("/collection-location/me", { credentials: "include" });
+
+            if (me.status === 401 || me.status === 403) {
+                window.location.href = "/signin-point.html";
+                return false;
+            }
+            if (!me.ok) {
+                console.error("failed to load /collection-location/me", me.status);
+                return false;
+            }
+
+            CURRENT_LOCATION = await me.json();
+
+            set_text("email-buffer", CURRENT_LOCATION.responsable_email);
+            set_text("phone-buffer", CURRENT_LOCATION.responsable_phone_number);
+            set_text("points-buffer", CURRENT_LOCATION.current_points);
+
+            const address = [
+                CURRENT_LOCATION.street,
+                CURRENT_LOCATION.number,
+                CURRENT_LOCATION.neighborhood,
+                CURRENT_LOCATION.complement,
+                CURRENT_LOCATION.city,
+                CURRENT_LOCATION.state,
+                CURRENT_LOCATION.cep,
+            ].filter(Boolean).join(", ");
+
+            set_text("address-buffer", address);
+            return true;
+        }
+
+        async function load_prizes_catalog() {
+            try {
+                const res = await fetch("/prize-type/active", { credentials: "include" });
+                if (!res.ok) {
+                    render_empty("prizes-catalog-list", "Nenhum prêmio disponível.");
+                    return;
+                }
+                const items = await res.json();
+                PRIZES = Array.isArray(items) ? items.filter(p => p.active !== false) : [];
+
+                const ul = document.getElementById("prizes-catalog-list");
+                ul.innerHTML = "";
+
+                if (PRIZES.length === 0) {
+                    render_empty("prizes-catalog-list", "Nenhum prêmio disponível.");
+                    return;
+                }
+
+                for (const p of PRIZES) {
+                    ul.appendChild(create_prize_item(p));
+                }
+            } catch (err) {
+                console.error("prizes catalog error:", err);
+                render_empty("prizes-catalog-list", "Erro ao carregar prêmios.");
+            }
+        }
+
+        function create_prize_item(p) {
+            const li = document.createElement("li");
+            li.className = "contract-item";
+
+            const header = document.createElement("div");
+            header.className = "contract-header";
+
+            const nameEl = document.createElement("span");
+            nameEl.className = "contract-role";
+            nameEl.textContent = p.name;
+
+            const costEl = document.createElement("span");
+            costEl.className = "contract-status status-pending";
+            costEl.textContent = `${p.cost_points} pts`;
+
+            header.appendChild(nameEl);
+            header.appendChild(costEl);
+            li.appendChild(header);
+
+            const descEl = document.createElement("div");
+            descEl.className = "contract-dates";
+            descEl.textContent = p.description || "";
+            li.appendChild(descEl);
+
+            const actions = document.createElement("div");
+            actions.className = "contract-actions";
+
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn-primary";
+            btn.textContent = "Resgatar";
+            btn.addEventListener("click", () => open_claim_modal(p));
+
+            actions.appendChild(btn);
+            li.appendChild(actions);
+
+            return li;
+        }
+
+        function open_claim_modal(prize) {
+            claim_prize_id = prize.id;
+
+            document.getElementById("claim-prize-name").textContent = prize.name;
+            document.getElementById("claim-prize-description").textContent = prize.description || "—";
+            document.getElementById("claim-prize-cost").textContent = prize.cost_points;
+            document.getElementById("claim-current-points").textContent =
+                CURRENT_LOCATION?.current_points ?? 0;
+
+            document.getElementById("claim-feedback").textContent = "";
+            document.getElementById("claim-modal").hidden = false;
+        }
+
+        function close_claim_modal() {
+            document.getElementById("claim-modal").hidden = true;
+            claim_prize_id = null;
+        }
+
+        function setup_claim_modal() {
+            const modal = document.getElementById("claim-modal");
+            const form = document.getElementById("claim-form");
+            const cancelBtn = document.getElementById("claim-cancel");
+            const confirmBtn = document.getElementById("claim-confirm");
+            const feedback = document.getElementById("claim-feedback");
+
+            function set_feedback(message, kind) {
+                feedback.textContent = message;
+                feedback.dataset.kind = kind || "";
+            }
+
+            function set_loading(is_loading) {
+                confirmBtn.disabled = is_loading;
+                confirmBtn.textContent = is_loading ? "..." : "Resgatar";
+            }
+
+            cancelBtn.addEventListener("click", close_claim_modal);
+
+            modal.addEventListener("click", (e) => {
+                if (e.target.id === "claim-modal") close_claim_modal();
+            });
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                if (!claim_prize_id) {
+                    set_feedback("Nenhum prêmio selecionado.", "error");
+                    return;
+                }
+
+                set_loading(true);
+                set_feedback("", "");
+
+                try {
+                    const res = await fetch("/prize-claim", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include",
+                        body: JSON.stringify({ prize_type_id: claim_prize_id }),
+                    });
+
+                    let payload = null;
+                    try { payload = await res.json(); } catch (_) {}
+
+                    if (!res.ok) {
+                        if (payload?.errors) {
+                            const first = Object.values(payload.errors)[0];
+                            set_feedback(String(first), "error");
+                            return;
+                        }
+                        set_feedback(payload?.error || "Falha ao resgatar.", "error");
+                        return;
+                    }
+
+                    set_feedback("Pedido enviado!", "success");
+                    setTimeout(async () => {
+                        close_claim_modal();
+                        await load_location();
+                        await load_claims();
+                    }, 600);
+                } catch (err) {
+                    console.error("claim error:", err);
+                    set_feedback("Erro ao conectar ao servidor.", "error");
+                } finally {
+                    set_loading(false);
+                }
+            });
+        }
+
+        function create_claim_item(p) {
+            const li = document.createElement("li");
+            li.className = "contract-item";
+
+            const header = document.createElement("div");
+            header.className = "contract-header";
+
+            const nameEl = document.createElement("span");
+            nameEl.className = "contract-role";
+            nameEl.textContent = p.prize_type_name || `Prêmio #${p.prize_type_id}`;
+
+            const statusEl = document.createElement("span");
+            statusEl.className = `contract-status ${STATUS_CLASS[p.status] || ""}`;
+            statusEl.textContent = STATUS_LABELS[p.status] || p.status;
+
+            header.appendChild(nameEl);
+            header.appendChild(statusEl);
+            li.appendChild(header);
+
+            const dates = document.createElement("div");
+            dates.className = "contract-dates";
+            dates.textContent = `Solicitado em ${format_date(p.claimed_at)}` +
+                (p.collected_at ? ` · Concluído em ${format_date(p.collected_at)}` : "");
+            li.appendChild(dates);
+
+            return li;
+        }
+
+        function render_claims_section(list_id, items, empty_message) {
+            const ul = document.getElementById(list_id);
+            ul.innerHTML = "";
+
+            if (!Array.isArray(items) || items.length === 0) {
+                render_empty(list_id, empty_message);
+                return;
+            }
+
+            for (const p of items) {
+                ul.appendChild(create_claim_item(p));
+            }
+        }
+
+        async function load_claims() {
+            try {
+                const res = await fetch("/prize-claim/me", { credentials: "include" });
+                if (!res.ok) {
+                    render_claims_section("claims-pending-list", [], "Nenhuma.");
+                    render_claims_section("claims-completed-list", [], "Nenhuma.");
+                    render_claims_section("claims-rejected-list", [], "Nenhuma.");
+                    render_claims_section("claims-cancelled-list", [], "Nenhuma.");
+                    return;
+                }
+
+                let items = await res.json();
+                if (!Array.isArray(items)) items = [];
+
+                const pending = items.filter(p => p.status === "pending");
+                const completed = items.filter(p => p.status === "completed" || p.status === "concluded");
+                const rejected = items.filter(p => p.status === "rejected");
+                const cancelled = items.filter(p => p.status === "cancelled");
+
+                render_claims_section("claims-pending-list", pending, "Nenhuma pendente.");
+                render_claims_section("claims-completed-list", completed, "Nenhuma concluída.");
+                render_claims_section("claims-rejected-list", rejected, "Nenhuma recusada.");
+                render_claims_section("claims-cancelled-list", cancelled, "Nenhuma cancelada.");
+
+                document.getElementById("section-claims-pending").style.display = pending.length ? "" : "none";
+                document.getElementById("section-claims-completed").style.display = completed.length ? "" : "none";
+                document.getElementById("section-claims-rejected").style.display = rejected.length ? "" : "none";
+                document.getElementById("section-claims-cancelled").style.display = cancelled.length ? "" : "none";
+            } catch (err) {
+                console.error("claims error:", err);
+            }
+        }
+
+        async function load_material_types() {
+            try {
+                const res = await fetch("/material-type", { credentials: "include" });
+                if (!res.ok) return [];
+                const items = await res.json();
+                return Array.isArray(items) ? items : [];
+            } catch (err) {
+                console.error("materials error:", err);
+                return [];
+            }
+        }
+
+        function populate_material_select() {
+            const select = document.getElementById("res-material");
+            select.innerHTML = '<option value="">-- selecione --</option>';
+
+            for (const m of MATERIALS) {
+                const opt = document.createElement("option");
+                opt.value = m.id;
+                opt.textContent = m.name;
+                select.appendChild(opt);
+            }
+        }
+
+        function create_residential_item(c) {
+            const li = document.createElement("li");
+            li.className = "contract-item";
+
+            const header = document.createElement("div");
+            header.className = "contract-header";
+
+            const title = document.createElement("span");
+            title.className = "contract-role";
+            title.textContent = c.material_type_name || `Material #${c.material_type_id}`;
+
+            const statusEl = document.createElement("span");
+            statusEl.className = `contract-status ${STATUS_CLASS[c.status] || ""}`;
+            statusEl.textContent = STATUS_LABELS[c.status] || c.status;
+
+            header.appendChild(title);
+            header.appendChild(statusEl);
+            li.appendChild(header);
+
+            const info = document.createElement("div");
+            info.className = "contract-dates";
+            const parts = [];
+            if (c.collect_type) parts.push(`Tipo: ${c.collect_type === "weight" ? "peso" : "unidade"}`);
+            if (c.quantity != null) parts.push(`Qtd: ${c.quantity}`);
+            if (c.description) parts.push(c.description);
+            parts.push(`Solicitado em ${format_date(c.requested_at)}`);
+            info.textContent = parts.join(" · ");
+            li.appendChild(info);
+
+            if (c.status === "pending") {
+                const actions = document.createElement("div");
+                actions.className = "contract-actions";
+
+                const cancelBtn = document.createElement("button");
+                cancelBtn.type = "button";
+                cancelBtn.className = "btn-danger";
+                cancelBtn.textContent = "Cancelar";
+                cancelBtn.addEventListener("click", () => cancel_residential(c.id));
+
+                actions.appendChild(cancelBtn);
+                li.appendChild(actions);
+            }
+
+            return li;
+        }
+
+        function render_residential_section(list_id, items, empty_message) {
+            const ul = document.getElementById(list_id);
+            ul.innerHTML = "";
+
+            if (!Array.isArray(items) || items.length === 0) {
+                render_empty(list_id, empty_message);
+                return;
+            }
+
+            for (const c of items) {
+                ul.appendChild(create_residential_item(c));
+            }
+        }
+
+        async function load_residential() {
+            try {
+                const res = await fetch("/requested-residential-collections/me", { credentials: "include" });
+                if (!res.ok) {
+                    render_residential_section("residential-pending-list", [], "Nenhuma pendente.");
+                    render_residential_section("residential-completed-list", [], "Nenhuma concluída.");
+                    render_residential_section("residential-rejected-list", [], "Nenhuma rejeitada.");
+                    render_residential_section("residential-cancelled-list", [], "Nenhuma cancelada.");
+                    return;
+                }
+
+                let items = await res.json();
+                if (!Array.isArray(items)) items = [];
+
+                const pending = items.filter(c => c.status === "pending");
+                const completed = items.filter(c => c.status === "completed" || c.status === "concluded");
+                const rejected = items.filter(c => c.status === "rejected");
+                const cancelled = items.filter(c => c.status === "cancelled");
+
+                render_residential_section("residential-pending-list", pending, "Nenhuma pendente.");
+                render_residential_section("residential-completed-list", completed, "Nenhuma concluída.");
+                render_residential_section("residential-rejected-list", rejected, "Nenhuma rejeitada.");
+                render_residential_section("residential-cancelled-list", cancelled, "Nenhuma cancelada.");
+            } catch (err) {
+                console.error("residential error:", err);
+            }
+        }
+
+        async function cancel_residential(collection_id) {
+            if (!confirm("Cancelar esta coleta? Esta ação não pode ser desfeita.")) return;
+
+            try {
+                const res = await fetch(
+                    `/requested-residential-collections/${collection_id}/cancel`,
+                    { method: "PUT", credentials: "include" }
+                );
+
+                if (!res.ok) {
+                    const body = await res.json().catch(() => null);
+                    alert(body?.error || "Falha ao cancelar.");
+                    return;
+                }
+
+                await load_residential();
+            } catch (err) {
+                console.error("cancel residential error:", err);
+                alert("Erro ao conectar ao servidor.");
+            }
+        }
+
+        function setup_residential_modal() {
+            const modal = document.getElementById("residential-modal");
+            const form = document.getElementById("residential-form");
+            const openBtn = document.getElementById("new-residential-btn");
+            const cancelBtn = document.getElementById("res-cancel");
+            const confirmBtn = document.getElementById("res-confirm");
+            const feedback = document.getElementById("res-feedback");
+
+            function set_feedback(message, kind) {
+                feedback.textContent = message;
+                feedback.dataset.kind = kind || "";
+            }
+
+            function set_loading(is_loading) {
+                confirmBtn.disabled = is_loading;
+                confirmBtn.textContent = is_loading ? "..." : "Enviar Pedido";
+            }
+
+            function open_modal() {
+                populate_material_select();
+                document.getElementById("res-material").value = "";
+                document.getElementById("res-collect-type").value = "";
+                document.getElementById("res-description").value = "";
+                set_feedback("", "");
+                modal.hidden = false;
+            }
+
+            function close_modal() {
+                modal.hidden = true;
+            }
+
+            openBtn.addEventListener("click", open_modal);
+            cancelBtn.addEventListener("click", close_modal);
+
+            modal.addEventListener("click", (e) => {
+                if (e.target.id === "residential-modal") close_modal();
+            });
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                set_feedback("", "");
+
+                const material_type_id = parseInt(document.getElementById("res-material").value, 10);
+                const collect_type = document.getElementById("res-collect-type").value;
+                const description = document.getElementById("res-description").value.trim();
+
+                if (!material_type_id) {
+                    set_feedback("Escolha um tipo de material.", "error");
+                    return;
+                }
+                if (!collect_type) {
+                    set_feedback("Escolha o tipo de coleta.", "error");
+                    return;
+                }
+
+                set_loading(true);
+                try {
+                    const res = await fetch("/requested-residential-collections", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        credentials: "include",
+                        body: JSON.stringify({
+                            material_type_id,
+                            collect_type,
+                            description: description || null,
+                        }),
+                    });
+
+                    let payload = null;
+                    try { payload = await res.json(); } catch (_) {}
+
+                    if (!res.ok) {
+                        if (payload?.errors) {
+                            const first = Object.values(payload.errors)[0];
+                            set_feedback(String(first), "error");
+                            return;
+                        }
+                        set_feedback(payload?.error || "Falha ao pedir coleta.", "error");
+                        return;
+                    }
+
+                    set_feedback("Coleta solicitada!", "success");
+                    setTimeout(async () => {
+                        close_modal();
+                        await load_residential();
+                    }, 600);
+                } catch (err) {
+                    console.error("residential request error:", err);
+                    set_feedback("Erro ao conectar ao servidor.", "error");
+                } finally {
+                    set_loading(false);
+                }
+            });
+        }
+
+        (async () => {
+            const ok = await load_location();
+            if (!ok) return;
+
+            MATERIALS = await load_material_types();
+
+            await load_prizes_catalog();
+            await load_claims();
+            await load_residential();
+
+            setup_claim_modal();
+            setup_residential_modal();
+        })();
+    </script>
+</body>
+</html>

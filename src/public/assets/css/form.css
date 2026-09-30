@@ -1,0 +1,86 @@
+@import url('colors.css');
+
+.form-container {
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    background-color: var(--bg-block);
+    padding: 1rem;
+    margin: 1rem;
+    border: 2px solid var(--border);
+    border-radius: 0.5rem;
+}
+
+.form-container hr {
+    width: 100%;
+}
+
+#form {
+    background-color: var(--bg-alternative);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.form-item {
+    margin: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1.3rem;
+}
+
+.form-item input {
+    padding: 0.4rem;
+    border-radius: 0.5rem;
+    background-color: var(--bg-block);
+    color: var(--text-main);
+}
+
+#submit-button {
+    width: fit-content;
+    padding: 0.3rem;
+
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    gap: 1.4rem;
+    align-items: center;
+}
+
+.form-actions li a {
+    text-decoration: none;
+    color: var(--text-another);
+    background-color: var(--bg-another);
+    border: 2px solid var(--border);
+    border-radius: 1rem;
+    padding: 0.5rem 0.7rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.form-actions li:hover a {
+    color: var(--text-alternative);
+    background-color: var(--bg-alternative);
+    border: 2px solid var(--border-alternative);
+}
+
+.form-feedback {
+    min-height: 1.2em;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.form-feedback[data-kind="error"] {
+    color: #c0392b;
+}
+
+.form-feedback[data-kind="success"] {
+    color: #27ae60;
+}

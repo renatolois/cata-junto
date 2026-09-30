@@ -110,7 +110,7 @@ class ResidentialCollectionModel extends CollectionModel {
     $this->status = 'completed';
   }
 
-  public function cancel(string $justification): void {
+  public function cancel(string|NeutralValue $justification): void {
     if ($this->status !== 'pending') {
       throw new \Exception("Cannot cancel a collection that is not pending.");
     }

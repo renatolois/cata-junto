@@ -9,6 +9,8 @@ use Core\Base\BaseService;
 use Core\Utils\EnvLoader;
 use App\Services\PersonService;
 use App\Services\CollectionLocationService;
+use App\Models\PersonModel;
+use App\Models\CollectionLocationModel;
 
 class AuthController extends BaseController {
 
@@ -25,7 +27,9 @@ class AuthController extends BaseController {
     $this->location_service = $location_service;
   }
 
-  public function login(): void {
+  public function login_person(): void {
+    $this->clear_token_cookie();
+
     $data = $this->get_body();
     if (empty($data['email']) || empty($data['password'])) {
       $this->error_response('email and password are required', 400);
@@ -36,38 +40,57 @@ class AuthController extends BaseController {
     $password = (string) $data['password'];
 
     $person = $this->person_service->find_by_email($email);
-    if ($person instanceof \App\Models\PersonModel && $person->verify_password($password)) {
-      if (!$person->is_active()) {
-        $this->error_response('Account is inactive', 403);
-        return;
-      }
-      $this->issue_token(['person_id' => $person->get_id()]);
+    if (!($person instanceof PersonModel) || !$person->verify_password($password)) {
+      $this->error_response('Invalid credentials', 401);
       return;
     }
+
+    if (!$person->is_active()) {
+      $this->error_response('Account is inactive', 403);
+      return;
+    }
+
+    $this->issue_token(['person_id' => $person->get_id()]);
+  }
+
+  public function login_location(): void {
+    $this->clear_token_cookie();
+
+    $data = $this->get_body();
+    if (empty($data['email']) || empty($data['password'])) {
+      $this->error_response('email and password are required', 400);
+      return;
+    }
+
+    $email = (string) $data['email'];
+    $password = (string) $data['password'];
 
     $location = $this->location_service->find_by_email($email);
-    if ($location instanceof \App\Models\CollectionLocationModel && $location->verify_password($password)) {
-      if (!$location->is_active()) {
-        $this->error_response('Account is inactive', 403);
-        return;
-      }
-      $this->issue_token(['collection_location_id' => $location->get_id()]);
+    if (!($location instanceof CollectionLocationModel) || !$location->verify_password($password)) {
+      $this->error_response('Invalid credentials', 401);
       return;
     }
 
-    $this->error_response('Invalid credentials', 401);
+    if (!$location->is_active()) {
+      $this->error_response('Account is inactive', 403);
+      return;
+    }
+
+    $this->issue_token(['collection_location_id' => $location->get_id()]);
   }
 
   public function logout(): void {
+    $this->clear_token_cookie();
+    $this->json_response(['message' => 'Logged out']);
+  }
+
+  private function clear_token_cookie(): void {
     setcookie('token', '', [
       'expires'  => time() - 3600,
       'path'     => '/',
-      'secure'   => true,
       'httponly' => true,
       'samesite' => 'Strict',
     ]);
-
-    $this->json_response(['message' => 'Logged out']);
   }
 
   private function issue_token(array $payload): void {
@@ -83,7 +106,6 @@ class AuthController extends BaseController {
     setcookie('token', $token, [
       'expires'  => time() + 86400,
       'path'     => '/',
-      #'secure'   => true,
       'httponly' => true,
       'samesite' => 'Strict',
     ]);

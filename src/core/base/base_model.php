@@ -115,7 +115,15 @@ abstract class BaseModel {
   }
 
   public function to_array(): array {
-    $data = $this->attributes;
+    $data = [];
+
+    foreach ($this->attributes as $key => $value) {
+      if ($value instanceof NeutralValue) {
+        $data[$key] = null;
+      } else {
+        $data[$key] = $value;
+      }
+    }
 
     foreach (array_keys($this->hiddens) as $key) {
       unset($data[$key]);

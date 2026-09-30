@@ -46,6 +46,11 @@ class ContractRepository extends BaseRepository {
     );
     return array_map([$this, 'hydrate'], $results);
   }
+  
+  public function find_by_responded_by(string $admin_contract_id): array {
+    $result = $this->db->select($this->table, ['responded_by_id' => $admin_contract_id]);
+    return array_map([$this, 'hydrate'], $result);
+  }
 
   public function find_active_by_person_id(string $person_id): array {
     $results = $this->db->select_where(

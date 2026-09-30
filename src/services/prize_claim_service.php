@@ -29,8 +29,11 @@ class PrizeClaimService extends BaseService {
     $this->prize_type_repository = $prize_type_repository;
   }
 
-  public function create(array $data): array|PrizeClaimModel {
+  public function create(array $data): array|PrizeClaimModel {    
     try {
+      $data['claimed_at'] = date('Y-m-d H:i:s');
+      $data['status'] = 'pending';
+      
       [$claim, $errors] = $this->hydrate_and_validate_fillables($data);
 
       if (!empty($errors)) {

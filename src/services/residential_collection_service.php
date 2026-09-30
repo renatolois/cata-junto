@@ -11,6 +11,7 @@ use App\Repositories\ContractRepository;
 use App\Repositories\MaterialTypeRepository;
 use App\Repositories\CollectionLocationRepository;
 use App\Repositories\RoleRepository;
+use App\Core\Utils\NeutralValue;
 use Core\Utils\AppConstants;
 use Core\Utils\Logger;
 use Exception;
@@ -164,7 +165,9 @@ class ResidentialCollectionService extends BaseService {
       if ($contract === null) {
         return ["errors" => ["contract_id" => "Contract not found."]];
       }
-      if ($contract->get_status() !== 'approved' || $contract->get_contract_end_at() !== null) {
+
+      $end_at = $contract->get_contract_end_at();
+      if ($contract->get_status() !== 'approved' || ($end_at !== null && !($end_at instanceof NeutralValue))) {
         return ["errors" => ["contract_id" => "Contract is not active."]];
       }
 
@@ -228,7 +231,7 @@ class ResidentialCollectionService extends BaseService {
     }
   }
 
-  public function cancel(string $pk, string $justification): array|ResidentialCollectionModel {
+  public function cancel(string $pk, string|NeutralValue $justification): array|ResidentialCollectionModel {
     try {
       $collection = $this->repository->find_by_id($pk);
       if ($collection === null) {
@@ -403,6 +406,25 @@ class ResidentialCollectionService extends BaseService {
     }
   }
 
+  public function find_by_collected_by(string $contract_id): array {
+    try {
+      return $this->repository->find_by_collected_by($contract_id);
+    } catch (Exception $e) {
+      Logger::error('Error finding residential collections by collected_by', [
+        'contract_id' => $contract_id,
+        'error' => $e->getMessage(),
+      ]);
+      return [
+        'errors' => [
+          'server_error' =>
+            AppConstants::RUN_MODE === 'debug'
+              ? $e->getMessage()
+              : 'unexpected_error',
+        ],
+      ];
+    }
+  }
+
   public function find_by_location_and_status(string $location_id, string $status): array {
     try {
       return $this->repository->find_by_collection_location_id_and_status($location_id, $status);
@@ -478,6 +500,34 @@ class ResidentialCollectionService extends BaseService {
             AppConstants::RUN_MODE === 'debug'
               ? $e->getMessage()
               : 'unexpected_error',
+        ],
+      ];
+    }
+  }
+
+  public function find_by_person(string $person_id): array {
+    try {
+      $contracts = $this->contract_repository->find_by_person_id($person_id);
+      $all = [];
+
+      foreach ($contracts as $contract) {
+        $collections = $this->repository->find_by_collected_by($contract->get_id());
+        foreach ($collections as $c) {
+          $all[] = $c;
+        }
+      }
+
+      return $all;
+    } catch (Exception $e) {
+      Logger::error('Error finding residential collections by person', [
+        'person_id' => $person_id,
+        'error' => $e->getMessage(),
+      ]);
+      return [
+        'errors' => [
+          'server_error' => AppConstants::RUN_MODE === 'debug'
+            ? $e->getMessage()
+            : 'unexpected_error',
         ],
       ];
     }

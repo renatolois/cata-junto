@@ -116,6 +116,11 @@ class MysqlAdapter extends BaseAdapter {
 
   public function update(string $table, int|string $id, array $data): array {
     Logger::all("Update in {$table}", ['id' => $id, 'data' => $data]);
+
+    unset($data['id']);
+    if (empty($data)) {
+      return $this->select_by_id($table, $id) ?? [];
+    }
     
     $sets = [];
     foreach ($data as $key => $value) {

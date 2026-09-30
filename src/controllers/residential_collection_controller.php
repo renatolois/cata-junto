@@ -5,6 +5,8 @@ namespace App\Controllers;
 
 use Core\Base\BaseController;
 use App\Services\ResidentialCollectionService;
+use App\Core\Utils\NeutralValue;
+
 
 class ResidentialCollectionController extends BaseController {
   public function __construct(ResidentialCollectionService $service) {
@@ -63,6 +65,20 @@ class ResidentialCollectionController extends BaseController {
   }
 
   /*
+  GET /residential-collections/me
+  */
+  public function list_my(): void {
+    $person_id = $this->get_route('auth_person_id');
+    if (!$person_id) {
+      $this->error_response('Unauthorized', 401);
+      return;
+    }
+
+    $result = $this->service->find_by_person($person_id);
+    $this->handle_result($result);
+  }
+
+  /*
   POST /residential-collection
   body: {
     "collection_location_id": "<LOCATION_ID>",
@@ -77,6 +93,14 @@ class ResidentialCollectionController extends BaseController {
       $this->error_response('Data not sent', 400);
       return;
     }
+
+    $location_id = $this->get_route('auth_location_id');
+    if (!$location_id) {
+        $this->error_response('Unauthorized', 401);
+        return;
+    }
+
+    $data['collection_location_id'] = $location_id;
 
     $result = $this->service->create($data);
     $this->handle_result($result, 201);
@@ -115,24 +139,25 @@ class ResidentialCollectionController extends BaseController {
   }
   */
   public function complete(): void {
-    $id = $this->get_route('id');
-    if (!$id) {
+    $collection_id = $this->get_route('collection_id');
+    if (!$collection_id) {
       $this->error_response('ID not provided', 400);
       return;
     }
 
-    $data = $this->get_body();
-    if (!isset($data['contract_id'])) {
-      $this->error_response('contract_id is required', 400);
+    $contract_id = $this->get_route('contract_id');
+    if (!$contract_id) {
+      $this->error_response('No active member contract', 403);
       return;
     }
 
+    $data = $this->get_body();
     if (!isset($data['quantity']) || !is_numeric($data['quantity']) || $data['quantity'] <= 0) {
       $this->error_response('quantity must be a positive number', 400);
       return;
     }
 
-    $result = $this->service->complete($id, $data['contract_id'], (float) $data['quantity']);
+    $result = $this->service->complete($collection_id, $contract_id, (float) $data['quantity']);
     $this->handle_result($result);
   }
 
@@ -149,8 +174,7 @@ class ResidentialCollectionController extends BaseController {
 
     $data = $this->get_body();
     if (!isset($data['justification']) || empty($data['justification'])) {
-      $this->error_response('justification is required', 400);
-      return;
+      $data['justification'] = NeutralValue::instance();
     }
 
     $result = $this->service->cancel($id, $data['justification']);
@@ -218,6 +242,14 @@ class ResidentialCollectionController extends BaseController {
     }
 
     $result = $this->service->deactivate($id, $data['justification']);
+    $this->handle_result($result);
+  }
+
+  /*
+  GET /available-residential-collections
+  */
+  public function list_pending(): void {
+    $result = $this->service->find_pending();
     $this->handle_result($result);
   }
 }
