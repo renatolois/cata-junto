@@ -133,6 +133,30 @@ CREATE TABLE IF NOT EXISTS prize_claim (
   FOREIGN KEY (prize_type_id) REFERENCES prize_type(id) ON DELETE RESTRICT
 );
 
+CREATE TABLE IF NOT EXISTS person_password_reset (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  person_id CHAR(36) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  code VARCHAR(6) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  used_at TIMESTAMP NULL,
+  FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS collection_location_password_reset (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  collection_location_id CHAR(36) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  code VARCHAR(6) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  used_at TIMESTAMP NULL,
+  FOREIGN KEY (collection_location_id) REFERENCES collection_location(id) ON DELETE CASCADE
+);
+
 CREATE INDEX idx_person_email ON person(email);
 CREATE INDEX idx_person_cpf ON person(cpf);
 CREATE INDEX idx_person_active ON person(active);
@@ -154,6 +178,10 @@ CREATE INDEX idx_prize_claim_status ON prize_claim(status);
 CREATE INDEX idx_prize_claim_claimed_by ON prize_claim(claimed_by);
 CREATE INDEX idx_prize_claim_prize_type ON prize_claim(prize_type_id);
 CREATE INDEX idx_prize_type_active ON prize_type(active);
+CREATE INDEX idx_person_reset_active ON person_password_reset(person_id, active);
+CREATE INDEX idx_person_reset_code ON person_password_reset(code, active);
+CREATE INDEX idx_location_reset_active ON collection_location_password_reset(collection_location_id, active);
+CREATE INDEX idx_location_reset_code ON collection_location_password_reset(code, active);
 SQL;
   }
 }

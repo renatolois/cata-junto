@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+// PHPMailer
+require __DIR__ . '/lib/PHPMailer/Exception.php';
+require __DIR__ . '/lib/PHPMailer/PHPMailer.php';
+require __DIR__ . '/lib/PHPMailer/SMTP.php';
+require __DIR__ . '/lib/PHPMailer/DSNConfigurator.php';
+
 // core/base
 require __DIR__ . '/core/base/base_adapter.php';
 require __DIR__ . '/core/base/base_model.php';
@@ -87,10 +93,14 @@ require __DIR__ . '/controllers/prize_type_controller.php';
 require __DIR__ . '/controllers/prize_claim_controller.php';
 require __DIR__ . '/controllers/role_controller.php';
 
+// handlers
+require __DIR__ . '/handlers/password_reset_handler.php';
+
 // routers
 require __DIR__ . '/routers/auth_router.php';
 require __DIR__ . '/routers/person_router.php';
 require __DIR__ . '/routers/collection_location_router.php';
+require __DIR__ . '/routers/password_reset_router.php';
 
 use Core\Utils\EnvLoader;
 use Db\Adapters\MysqlAdapter;
@@ -136,6 +146,8 @@ use App\Controllers\PrizeTypeController;
 use App\Controllers\PrizeClaimController;
 use App\Controllers\RoleController;
 
+use App\Handlers\PasswordResetHandler;
+
 use App\Middlewares\AuthMiddleware;
 use App\Middlewares\AuthorizationMiddleware;
 use App\Middlewares\CollectionLocationOnlyMiddleware;
@@ -144,6 +156,7 @@ use App\Middlewares\PersonOnlyMiddleware;
 use App\Routers\AuthRouter;
 use App\Routers\PersonRouter;
 use App\Routers\CollectionLocationRouter;
+use App\Routers\PasswordResetRouter;
 
 EnvLoader::load();
 
@@ -191,6 +204,8 @@ $prize_type_controller             = new PrizeTypeController($prize_type_service
 $prize_claim_controller            = new PrizeClaimController($prize_claim_service);
 $role_controller                   = new RoleController($role_service);
 
+$password_reset_handler = new PasswordResetHandler($person_service, $db);
+
 $controllers = [
     'AuthController'                  => $auth_controller,
     'PersonController'                => $person_controller,
@@ -202,6 +217,7 @@ $controllers = [
     'PrizeTypeController'             => $prize_type_controller,
     'PrizeClaimController'            => $prize_claim_controller,
     'RoleController'                  => $role_controller,
+    'PasswordResetHandler'            => $password_reset_handler,
 ];
 
 $auth_middleware    = new AuthMiddleware($person_repo, $collection_location_repo);
@@ -214,8 +230,10 @@ $person_only        = new PersonOnlyMiddleware();
 $auth_router                = new AuthRouter($controllers);
 $person_router              = new PersonRouter($controllers);
 $collection_location_router = new CollectionLocationRouter($controllers);
+$password_reset_router      = new PasswordResetRouter($controllers);
 
 $auth_router->register_routes();
+$password_reset_router->register_routes();
 
 $person_router->register_routes(
     $auth_middleware,
@@ -234,6 +252,7 @@ $routers = [
     $auth_router,
     $person_router,
     $collection_location_router,
+    $password_reset_router,
 ];
 
 $method = $_SERVER['REQUEST_METHOD'];

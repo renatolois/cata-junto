@@ -22,15 +22,18 @@ class EnvLoader {
       }
 
       self::$env_vars = [
-        'db_host'     => $_ENV['DB_HOST']     ?? '127.0.0.1',
-        'db_port'     => $_ENV['DB_PORT']     ?? '3306',
-        'db_name'     => $_ENV['DB_NAME']     ?? 'database',
-        'db_user'     => $_ENV['DB_USER']     ?? 'root',
-        'db_password' => $_ENV['DB_PASSWORD'] ?? '',
-        'app_mode'    => $_ENV['APP_MODE']    ?? 'debug',
-        'app_env'     => $_ENV['APP_ENV']     ?? 'testing',
-        'log_level'   => $_ENV['LOG_LEVEL']   ?? 'all',
-        'jwt_secret'  => $_ENV['JWT_SECRET']  ?? null,
+        'db_host'              =>  $_ENV['DB_HOST']              ?? '127.0.0.1',
+        'db_port'              =>  $_ENV['DB_PORT']              ?? '3306',
+        'db_name'              =>  $_ENV['DB_NAME']              ?? 'database',
+        'db_user'              =>  $_ENV['DB_USER']              ?? 'root',
+        'db_password'          =>  $_ENV['DB_PASSWORD']          ?? '',
+        'app_mode'             =>  $_ENV['APP_MODE']             ?? 'debug',
+        'app_env'              =>  $_ENV['APP_ENV']              ?? 'testing',
+        'log_level'            =>  $_ENV['LOG_LEVEL']            ?? 'all',
+        'jwt_secret'           =>  $_ENV['JWT_SECRET']           ?? null,
+        'google_app_password'  =>  $_ENV['GOOGLE_APP_PASSWORD']  ?? null,
+        'google_email'         =>  $_ENV['GOOGLE_EMAIL']         ?? null,
+        'mailer_from_name'     =>  $_ENV['MAILER_FROM_NAME']     ?? null,
       ];
 
       return self::$env_vars;
