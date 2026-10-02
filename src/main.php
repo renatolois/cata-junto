@@ -222,7 +222,7 @@ $controllers = [
 
 $auth_middleware    = new AuthMiddleware($person_repo, $collection_location_repo);
 $admin_only         = new AuthorizationMiddleware($contract_repo, $role_repo, ['admin']);
-$admin_or_member    = new AuthorizationMiddleware($contract_repo, $role_repo, ['admin', 'member']);
+$member_only    = new AuthorizationMiddleware($contract_repo, $role_repo, ['member']);
 $location_only      = new CollectionLocationOnlyMiddleware();
 $person_only        = new PersonOnlyMiddleware();
 
@@ -237,7 +237,7 @@ $password_reset_router->register_routes();
 $person_router->register_routes(
     $auth_middleware,
     $admin_only,
-    $admin_or_member,
+    $member_only,
     $person_only
 );
 
