@@ -5,6 +5,7 @@ namespace Db\Schemas;
 
 class MysqlSchema {
   public static function get_creation_string(): string {
+    # if you want, change by another hash. the password for the used hash is "admin123"
     return <<<SQL
 CREATE DATABASE IF NOT EXISTS cata_junto
 CHARACTER SET utf8mb4
@@ -182,6 +183,22 @@ CREATE INDEX idx_person_reset_active ON person_password_reset(person_id, active)
 CREATE INDEX idx_person_reset_code ON person_password_reset(code, active);
 CREATE INDEX idx_location_reset_active ON collection_location_password_reset(collection_location_id, active);
 CREATE INDEX idx_location_reset_code ON collection_location_password_reset(code, active);
+
+INSERT INTO role (name, active) VALUES ('admin', 1), ('member', 1);
+
+INSERT INTO person
+  (id, cpf, name, email, verified_email, password_hash, phone_number, birth_date, current_points, active)
+VALUES
+  (UUID(), '11111111111', 'Admin', 'admin@catajunto.local', 1, 'temp', '21999999991', '1990-01-01', 0, 1);
+
+UPDATE person
+SET password_hash = '$2y$12$0eec/8yrwql8HyBVIwZHKO6necqJyR0qkFG6BsGe.XSqPuTyrBwxi'
+WHERE email = 'admin@catajunto.local';
+
+INSERT INTO contract (id, person_id, role_id, requested_at, responded_at, status)
+SELECT UUID(), p.id, r.id, NOW(), NOW(), 'approved'
+FROM person p, role r
+WHERE p.email = 'admin@catajunto.local' AND r.name = 'admin';
 SQL;
   }
 }

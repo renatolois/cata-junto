@@ -11,6 +11,8 @@ setar true no 'secure' em auth controller
 
 fazer residential collection adicionar pontos para collection location
 
+tem duas rotas para get material-type, no collection location router e person router -> nao dá problema, mas ver depois.
+
 ###############
 
 person model tem current points por compatibilidade

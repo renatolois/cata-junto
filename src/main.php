@@ -223,7 +223,6 @@ $controllers = [
 $auth_middleware    = new AuthMiddleware($person_repo, $collection_location_repo);
 $admin_only         = new AuthorizationMiddleware($contract_repo, $role_repo, ['admin']);
 $admin_or_member    = new AuthorizationMiddleware($contract_repo, $role_repo, ['admin', 'member']);
-$admin_or_deliverer = new AuthorizationMiddleware($contract_repo, $role_repo, ['admin', 'member']);
 $location_only      = new CollectionLocationOnlyMiddleware();
 $person_only        = new PersonOnlyMiddleware();
 
