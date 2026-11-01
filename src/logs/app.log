@@ -211,3 +211,13 @@
 [2026-10-01 01:28:46] ALL: Select returned 1 records from person 
 [2026-10-01 01:28:46] ALL: Select from contract {"where":{"person_id":"f3758d09-3a47-4fbf-a91c-7e703ec812ed"}}
 [2026-10-01 01:28:46] ALL: Select returned 0 records from contract 
+[2026-10-03 13:07:12] ALL: MySQLAdapter initialized 
+[2026-10-03 13:07:12] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1049] Unknown database 'if0_43055321_cata_junto'"}
+[2026-10-03 13:07:12] ALL: MySQLAdapter initialized 
+[2026-10-03 13:07:12] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1049] Unknown database 'if0_43055321_cata_junto'"}
+[2026-10-03 13:07:22] ALL: MySQLAdapter initialized 
+[2026-10-03 13:07:22] ERROR: Error connecting to MySQL {"error":"SQLSTATE[HY000] [1049] Unknown database 'if0_43055321_cata_junto'"}
+[2026-10-03 13:07:32] ALL: MySQLAdapter initialized 
+[2026-10-03 13:07:32] INFO: MySQL connected successfully {"database":"cata_junto","user":"root"}
+[2026-10-03 13:07:33] ALL: MySQLAdapter initialized 
+[2026-10-03 13:07:33] INFO: MySQL connected successfully {"database":"cata_junto","user":"root"}
